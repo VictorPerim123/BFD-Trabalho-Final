@@ -33,7 +33,8 @@ O SavePoint foi projetado utilizando tecnologias modernas e eficientes para gara
 
  Equipe de Desenvolvimento
 
-    Victor Alexandre Silva Perim 
+    Victor Alexandre Silva Perim — @Victor Perim
 
-    Adriano Pereira da Silva 
+    Adriano Pereira Silva — @Adriano Pereira
+
 
