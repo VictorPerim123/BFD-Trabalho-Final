@@ -32,9 +32,9 @@ O SavePoint foi projetado utilizando tecnologias modernas e eficientes para gara
     Rede de Amizades: Possibilidade de adicionar usuários parceiros para comparar estatísticas e progresso de conquistas de forma direta.
 
  Equipe de Desenvolvimento
-
-    Victor Alexandre Silva Perim — @Victor Perim
-
-    Adriano Pereira Silva — @Adriano Pereira
+    | Nome                   | GitHub                                      |
+|------------------------|---------------------------------------------|
+| Adriano Pereira Silva  | [@Adriano Pereira](https://github.com/Tahuno)    |
+| Victor Perim            | [@victorperim123](https://github.com/victorperim123) |
 
 
