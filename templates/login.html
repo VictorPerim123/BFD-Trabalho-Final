@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SavePoint — Entrar</title>
+  <meta name="description" content="Entre na sua conta SavePoint para acessar seu backlog." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../static/css/reset.css" />
+  <link rel="stylesheet" href="../static/css/main.css" />
+  <link rel="stylesheet" href="../static/css/components.css" />
+</head>
+<body>
+  <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
+  <main class="centered-page" id="conteudo-principal">
+    <section class="card auth-card" aria-labelledby="login-titulo">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Save<span class="brand-accent">Point</span>
+      </div>
+      <h1 id="login-titulo" class="visually-hidden">Entrar no SavePoint</h1>
+      <p class="subtitle">Continue de onde você parou.</p>
+
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-usuario">Usuário ou e-mail</label>
+          <input type="text" id="login-usuario" name="usuario" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="login-senha">Senha</label>
+          <input type="password" id="login-senha" name="senha" autocomplete="current-password" required />
+          <p class="hint">A autenticação real (sessão + hash de senha) será conectada quando o backend estiver disponível.</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+
+      <p class="auth-switch">
+        Não tem conta? <a href="#">Cadastre-se</a>
+      </p>
+    </section>
+  </main>
+
+  <div id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="../static/js/ui.js"></script>
+  <script>
+    document.getElementById("login-form").addEventListener("submit", function (event) {
+      event.preventDefault();
+      SavePointUI.showToast("Login simulado — backend ainda não implementado.");
+      window.setTimeout(() => (window.location.href = "dashboard.html"), 900);
+    });
+  </script>
+</body>
+</html>

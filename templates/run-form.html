@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SavePoint — Registrar Run</title>
+  <meta name="description" content="Registre rapidamente o resultado da sua última run." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../static/css/reset.css" />
+  <link rel="stylesheet" href="../static/css/main.css" />
+  <link rel="stylesheet" href="../static/css/components.css" />
+</head>
+<body>
+  <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Save<span class="brand-accent">Point</span>
+      </div>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        <a href="dashboard.html">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="backlog.html">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/></svg>
+          </span>
+          Meu Backlog
+        </a>
+        <a href="run-form.html" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M13 2L3 14h6l-1 8 11-14h-7z"/></svg>
+          </span>
+          Registrar Run
+        </a>
+        <a href="builds.html">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M22 6.5a4.5 4.5 0 01-6.36 4.1L9.5 16.7a2 2 0 11-2.83-2.83l6.1-6.14A4.5 4.5 0 1122 6.5z"/></svg>
+          </span>
+          Minhas Builds
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="login.html">
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M10 3v2H5v14h5v2H3V3zM16.17 12l-3.58-3.59L14 7l6 5-6 5-1.41-1.41L16.17 13H9v-1z"/></svg>
+          </span>
+          Sair
+        </a>
+      </div>
+    </aside>
+
+    <main class="app-main" id="conteudo-principal">
+      <header class="page-topbar">
+        <h1>Registrar Nova Run</h1>
+      </header>
+
+      <form id="run-form" class="card" style="max-width: 420px;" novalidate>
+        <div class="field">
+          <label for="run-jogo">Selecionar jogo</label>
+          <select id="run-jogo" name="jogo" required aria-describedby="erro-jogo">
+            <option value="">Carregando jogos…</option>
+          </select>
+          <p class="error-message" id="erro-jogo" role="alert"></p>
+        </div>
+
+        <div class="field">
+          <label for="run-data">Data da run</label>
+          <input type="date" id="run-data" name="data" required />
+        </div>
+
+        <div class="field">
+          <label for="run-tempo">Tempo de duração</label>
+          <input type="time" id="run-tempo" name="tempo" step="1" required aria-describedby="erro-tempo" />
+          <p class="hint">Formato hh:mm:ss.</p>
+          <p class="error-message" id="erro-tempo" role="alert"></p>
+        </div>
+
+        <fieldset class="toggle-group" aria-describedby="erro-resultado">
+          <legend>Resultado</legend>
+          <label class="toggle-option">
+            <input type="radio" name="resultado" value="vitoria" required />
+            <span>Vitória</span>
+          </label>
+          <label class="toggle-option">
+            <input type="radio" name="resultado" value="derrota" required />
+            <span>Derrota</span>
+          </label>
+        </fieldset>
+        <p class="error-message" id="erro-resultado" role="alert"></p>
+
+        <div class="field" id="causa-morte-wrapper" hidden>
+          <label for="run-causa-morte">Observações / causa da morte</label>
+          <textarea id="run-causa-morte" name="causa_morte" placeholder="Ex: Delirium na Cave"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Salvar Run</button>
+      </form>
+    </main>
+  </div>
+
+  <div id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="../static/js/api.js"></script>
+  <script src="../static/js/ui.js"></script>
+  <script src="../static/js/run-form.js"></script>
+</body>
+</html>

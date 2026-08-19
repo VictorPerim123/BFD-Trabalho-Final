@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "titulo": "Elden Ring",
+    "status": "jogando",
+    "nota": 9.5,
+    "tempo_jogado_horas": 62,
+    "total_conquistas": 42,
+    "conquistas_obtidas": 27,
+    "categorias": ["RPG", "Souls-like"]
+  },
+  {
+    "id": 2,
+    "titulo": "Hades II",
+    "status": "quero_jogar",
+    "nota": null,
+    "tempo_jogado_horas": 0,
+    "total_conquistas": 49,
+    "conquistas_obtidas": 0,
+    "categorias": ["Roguelike"]
+  },
+  {
+    "id": 3,
+    "titulo": "Cyberpunk 2077",
+    "status": "zerado",
+    "nota": 9.0,
+    "tempo_jogado_horas": 87,
+    "total_conquistas": 44,
+    "conquistas_obtidas": 44,
+    "categorias": ["RPG", "Ação"]
+  },
+  {
+    "id": 4,
+    "titulo": "Baldur's Gate 3",
+    "status": "platinado",
+    "nota": 10,
+    "tempo_jogado_horas": 140,
+    "total_conquistas": 54,
+    "conquistas_obtidas": 54,
+    "categorias": ["RPG", "Estratégia"]
+  },
+  {
+    "id": 5,
+    "titulo": "Dead Cells",
+    "status": "abandonado",
+    "nota": 6.5,
+    "tempo_jogado_horas": 18,
+    "total_conquistas": 30,
+    "conquistas_obtidas": 9,
+    "categorias": ["Roguelike", "Ação"]
+  },
+  {
+    "id": 6,
+    "titulo": "The Binding of Isaac",
+    "status": "jogando",
+    "nota": 8.5,
+    "tempo_jogado_horas": 95,
+    "total_conquistas": 60,
+    "conquistas_obtidas": 33,
+    "categorias": ["Roguelike"]
+  }
+]
