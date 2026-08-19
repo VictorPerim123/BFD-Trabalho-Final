@@ -1,4 +1,3 @@
--- Script do banco
 CREATE TABLE IF NOT EXISTS usuarios (
     "idUsuario" INTEGER GENERATED ALWAYS AS IDENTITY,
     username VARCHAR(100) NOT NULL,

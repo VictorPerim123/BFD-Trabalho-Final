@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "jogo_id": 1,
+    "nome_build": "Sanguinário Faminto",
+    "detalhes_equipamento": "Espada Rivers of Blood + Escudo Brass",
+    "habilidades": "Foco em Sangramento (Arcane) e Vigor alto"
+  },
+  {
+    "id": 2,
+    "jogo_id": 4,
+    "nome_build": "Mago Elemental",
+    "detalhes_equipamento": "Cajado do Arqui-mago + Anel de Absorção",
+    "habilidades": "Bola de Fogo, Raio, Metamagia Estendida"
+  }
+]
