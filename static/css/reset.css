@@ -36,7 +36,7 @@
   --bottomnav-height: 64px;
 }
 
-/* Reduz movimento para quem preferir */
+/* Reduz movimento para quem preferir (acessibilidade) */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -109,7 +109,6 @@ ul, ol {
   outline: none;
 }
 
-/* ---------- Skip link ---------- */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -125,7 +124,6 @@ ul, ol {
   left: 0;
 }
 
-/* ---------- Utilitário para texto só-leitor-de-tela ---------- */
 .visually-hidden {
   position: absolute !important;
   width: 1px;

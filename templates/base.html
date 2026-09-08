@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SavePoint — {% block title %}{% endblock %}</title>
+  <meta name="description" content="{% block description %}Organizador de backlog de jogos e runs de roguelike.{% endblock %}" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
+
+  <div class="app-shell">
+    <aside class="app-sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Save<span class="brand-accent">Point</span>
+      </div>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        {% for item in nav_items %}
+        <a href="{{ url_for(item.endpoint) }}" {% if request.endpoint == item.endpoint %}aria-current="page"{% endif %}>
+          <span class="nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="{{ item.icon }}"/></svg>
+          </span>
+          <span class="nav-label-full">{{ item.label }}</span>
+          <span class="nav-label-short">{{ item.short_label or item.label }}</span>
+        </a>
+        {% endfor %}
+      </nav>
+
+      <div class="sidebar-footer">
+        {% if usuario_logado %}
+        <p class="hint" style="margin-bottom: var(--space-2);">{{ usuario_logado.nome }}</p>
+        <form action="{{ url_for('auth.logout') }}" method="post">
+          <button type="submit" class="btn btn-ghost btn-sm btn-block">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M10 3v2H5v14h5v2H3V3zM16.17 12l-3.58-3.59L14 7l6 5-6 5-1.41-1.41L16.17 13H9v-1z"/></svg>
+            </span>
+            Sair
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </aside>
+
+    <main class="app-main" id="conteudo-principal">
+      {% with mensagens = get_flashed_messages() %}
+        {% if mensagens %}
+        <div class="empty-state" role="status" style="margin-bottom: var(--space-5);">
+          {% for mensagem in mensagens %}<p style="margin:0;">{{ mensagem }}</p>{% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <div id="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

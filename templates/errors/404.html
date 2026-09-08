@@ -1,0 +1,15 @@
+{% extends "base_publico.html" %}
+
+{% block title %}Página não encontrada{% endblock %}
+
+{% block content %}
+    <section class="card" style="max-width: 460px; text-align:center;">
+      <div class="brand" style="justify-content:center;">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Save<span class="brand-accent">Point</span>
+      </div>
+      <h1>404 — Checkpoint não encontrado</h1>
+      <p>A página que você tentou acessar não existe ou foi movida.</p>
+      <a class="btn btn-primary" href="{{ url_for('pages.raiz') }}">Voltar ao início</a>
+    </section>
+{% endblock %}

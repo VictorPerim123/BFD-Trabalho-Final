@@ -44,7 +44,7 @@
 }
 .brand-accent { color: var(--accent-gold); }
 
-/* ---------- Navegação principal ---------- */
+/* ---------- Navegação principal (sidebar no desktop) ---------- */
 .main-nav {
   display: flex;
   flex-direction: column;
@@ -194,10 +194,23 @@
   }
 }
 
-/* ---------- Página centrada sem sidebar ---------- */
+/* ---------- Página centrada (login/registro), sem sidebar ---------- */
 .centered-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: var(--space-5);
+}
+
+.nav-label-short {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .nav-label-full {
+    display: none;
+  }
+  .nav-label-short {
+    display: inline;
+  }
 }
