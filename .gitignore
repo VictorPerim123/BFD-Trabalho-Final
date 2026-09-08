@@ -1,0 +1,16 @@
+# Ambiente Python
+venv/
+__pycache__/
+*.pyc
+.env
+instance/
+.pytest_cache/
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node (caso ferramentas de build sejam usadas no futuro)
+node_modules/
