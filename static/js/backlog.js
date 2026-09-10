@@ -19,18 +19,28 @@
       populateCategoryFilter(allGames);
       renderGames();
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar o backlog agora.", { isError: true });
+      SavePointUI.showToast("Não foi possível carregar o backlog agora.", {
+        isError: true,
+      });
       console.error(err);
     }
   }
 
   function populateCategoryFilter(games) {
     const categorias = new Set();
-    games.forEach((g) => (g.categorias || []).forEach((c) => categorias.add(c)));
+    games.forEach((g) =>
+      (g.categorias || []).forEach((c) => categorias.add(c)),
+    );
     const current = categoryFilter.value;
     categoryFilter.innerHTML =
       '<option value="">Categoria: todas</option>' +
-      [...categorias].sort().map((c) => `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`).join("");
+      [...categorias]
+        .sort()
+        .map(
+          (c) =>
+            `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`,
+        )
+        .join("");
     categoryFilter.value = current;
   }
 
@@ -42,7 +52,8 @@
     return allGames.filter((g) => {
       const matchesTerm = !term || g.titulo.toLowerCase().includes(term);
       const matchesStatus = !status || g.status === status;
-      const matchesCategoria = !categoria || (g.categorias || []).includes(categoria);
+      const matchesCategoria =
+        !categoria || (g.categorias || []).includes(categoria);
       return matchesTerm && matchesStatus && matchesCategoria;
     });
   }
@@ -89,13 +100,16 @@
       </div>
       <div class="game-card__actions">
         <button type="button" class="btn btn-ghost btn-sm" data-action="edit">Editar</button>
-        <a class="btn btn-ghost btn-sm" href="run-form.html?jogo_id=${game.id}&titulo=${encodeURIComponent(game.titulo)}">Nova Run</a>
         <button type="button" class="btn btn-danger-outline btn-sm" data-action="delete">Excluir</button>
       </div>
     `;
 
-    article.querySelector('[data-action="edit"]').addEventListener("click", () => openForm(game));
-    article.querySelector('[data-action="delete"]').addEventListener("click", () => handleDelete(game));
+    article
+      .querySelector('[data-action="edit"]')
+      .addEventListener("click", () => openForm(game));
+    article
+      .querySelector('[data-action="delete"]')
+      .addEventListener("click", () => handleDelete(game));
 
     return article;
   }
@@ -106,6 +120,9 @@
     form.elements.titulo.value = game?.titulo || "";
     form.elements.status.value = game?.status || "quero_jogar";
     form.elements.nota.value = game?.nota ?? "";
+    form.elements.tempo_jogado_horas.value = game?.tempo_jogado_horas ?? 0;
+    form.elements.total_conquistas.value = game?.total_conquistas ?? 0;
+    form.elements.conquistas_obtidas.value = game?.conquistas_obtidas ?? 0;
     form.elements.categorias.value = (game?.categorias || []).join(", ");
     formCard.hidden = false;
     form.elements.titulo.focus();
@@ -125,7 +142,11 @@
       return;
     }
 
-    const existing = editingId ? allGames.find((g) => g.id === editingId) : null;
+    const numero = (campo) => {
+      const valor = Number(form.elements[campo].value);
+      return Number.isFinite(valor) && valor > 0 ? Math.round(valor) : 0;
+    };
+
     const payload = {
       id: editingId,
       titulo,
@@ -135,23 +156,44 @@
         .split(",")
         .map((c) => c.trim())
         .filter(Boolean),
-      tempo_jogado_horas: existing?.tempo_jogado_horas ?? 0,
-      total_conquistas: existing?.total_conquistas ?? 0,
-      conquistas_obtidas: existing?.conquistas_obtidas ?? 0,
+      tempo_jogado_horas: numero("tempo_jogado_horas"),
+      total_conquistas: numero("total_conquistas"),
+      conquistas_obtidas: numero("conquistas_obtidas"),
     };
 
-    await SavePointAPI.saveGame(payload);
-    SavePointUI.showToast(editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.");
-    closeForm();
-    await loadGames();
+    if (payload.conquistas_obtidas > payload.total_conquistas) {
+      SavePointUI.showToast("Conquistas obtidas não podem passar do total.", {
+        isError: true,
+      });
+      return;
+    }
+
+    try {
+      await SavePointAPI.saveGame(payload);
+      SavePointUI.showToast(
+        editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.",
+      );
+      closeForm();
+      await loadGames();
+    } catch (err) {
+      SavePointUI.showToast(err.message || "Não foi possível salvar o jogo.", {
+        isError: true,
+      });
+    }
   }
 
   async function handleDelete(game) {
     const confirmed = window.confirm(`Remover "${game.titulo}" do backlog?`);
     if (!confirmed) return;
-    await SavePointAPI.deleteGame(game.id);
-    SavePointUI.showToast("Jogo removido.");
-    await loadGames();
+    try {
+      await SavePointAPI.deleteGame(game.id);
+      SavePointUI.showToast("Jogo removido.");
+      await loadGames();
+    } catch (err) {
+      SavePointUI.showToast(err.message || "Não foi possível remover o jogo.", {
+        isError: true,
+      });
+    }
   }
 
   searchInput.addEventListener("input", renderGames);

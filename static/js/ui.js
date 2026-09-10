@@ -15,6 +15,7 @@ const SavePointUI = (() => {
     abandonado: "badge--abandonado",
   };
 
+  // Evita injecaoo de HTML ao inserir dados dinamicos no DOM
   function escapeHtml(value) {
     const div = document.createElement("div");
     div.textContent = value ?? "";
@@ -29,6 +30,11 @@ const SavePointUI = (() => {
     return STATUS_BADGE_CLASS[status] || "";
   }
 
+  /**
+   * Mostra uma mensagem de feedback temporaria, anunciada a leitores
+   * de tela via aria-live (regiao ja presente em cada pagina no elemento
+   * #toast-region).
+   */
   function showToast(message, { isError = false } = {}) {
     const region = document.getElementById("toast-region");
     if (!region) return;
@@ -47,5 +53,12 @@ const SavePointUI = (() => {
     return `${horas}h`;
   }
 
-  return { escapeHtml, statusLabel, statusBadgeClass, showToast, formatHoras, STATUS_LABELS };
+  return {
+    escapeHtml,
+    statusLabel,
+    statusBadgeClass,
+    showToast,
+    formatHoras,
+    STATUS_LABELS,
+  };
 })();

@@ -8,10 +8,10 @@ from app.extensions import db
 
 NAV_ITEMS = [
     {
-        "endpoint": "pages.raiz",
-        "label": "Início",
-        "short_label": "Início",
-        "icon": "M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z",
+        "endpoint": "pages.backlog",
+        "label": "Meu Backlog",
+        "short_label": "Backlog",
+        "icon": "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
     },
 ]
 
@@ -29,7 +29,7 @@ def create_app(config_class=Config):
     _registrar_context_processors(app)
 
     with app.app_context():
-        from app import models
+        from app import models  
         db.create_all()
 
     return app
