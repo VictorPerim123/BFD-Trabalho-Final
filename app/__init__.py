@@ -38,9 +38,11 @@ def create_app(config_class=Config):
 def _registrar_blueprints(app):
     from app.routes.pages import pages_bp
     from app.routes.auth import auth_bp
+    from app.routes.api_jogos import api_jogos_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(api_jogos_bp)
 
 
 def _registrar_error_handlers(app):
