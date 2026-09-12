@@ -1,16 +1,7 @@
-"""
-BacklogService — camada de serviço que concentra as regras de negócio do
-backlog (validação e sincronização de categorias N:M), mantendo as rotas (controllers) finas e os models focados
-em persistência.
-
-Esta é a classe Python "usada de forma significativa" pedida no requisito
-2.3: ela não é apenas um contêiner de dados, e sim a fronteira onde toda
-regra de negócio do backlog é validada antes de tocar o banco.
-"""
-
 from app.extensions import db
-from app.models import Jogo, Categoria
+from app.models import Jogo, Categoria, RunDiario, BuildAnotacao
 from app.models.jogo import STATUS_VALIDOS
+from app.models.run_diario import RESULTADOS_VALIDOS
 
 
 class ErroDeValidacao(ValueError):
@@ -18,7 +9,7 @@ class ErroDeValidacao(ValueError):
 
 
 class RecursoNaoEncontrado(LookupError):
-    """Jogo inexistente OU pertencente a outro usuário (tratado como HTTP 404)."""
+    """Jogo/run/build inexistente OU pertencente a outro usuário (tratado como HTTP 404)."""
 
 
 class BacklogService:
@@ -119,3 +110,104 @@ class BacklogService:
                 db.session.add(categoria)
             categorias.append(categoria)
         jogo.categorias = categorias
+
+    # ------------------------------------------------------------------ #
+    # Runs
+    # ------------------------------------------------------------------ #
+    def listar_runs(self):
+        return (
+            RunDiario.query.join(Jogo)
+            .filter(Jogo.usuario_id == self.usuario.id)
+            .order_by(RunDiario.data.desc(), RunDiario.id.desc())
+            .all()
+        )
+
+    def registrar_run(self, dados):
+        jogo = self.obter_jogo(dados.get("jogo_id"))
+
+        resultado = dados.get("resultado")
+        if resultado not in RESULTADOS_VALIDOS:
+            raise ErroDeValidacao(f"Resultado inválido: {resultado!r}. Use um de {RESULTADOS_VALIDOS}.")
+
+        tempo_duracao = dados.get("tempo_duracao")
+        if not tempo_duracao:
+            raise ErroDeValidacao("Informe o tempo de duração da run.")
+        try:
+            duracao_segundos = RunDiario.segundos_a_partir_de_hhmmss(tempo_duracao)
+        except (ValueError, AttributeError):
+            raise ErroDeValidacao("Tempo de duração inválido — use o formato HH:MM:SS.")
+
+        from datetime import date
+
+        try:
+            data_run = date.fromisoformat(dados["data"]) if dados.get("data") else date.today()
+        except ValueError:
+            raise ErroDeValidacao("Data inválida — use o formato AAAA-MM-DD.")
+
+        run = RunDiario(
+            jogo_id=jogo.id,
+            data=data_run,
+            duracao_segundos=duracao_segundos,
+            resultado=resultado,
+            causa_morte=(dados.get("causa_morte") or None) if resultado == "derrota" else None,
+        )
+        db.session.add(run)
+        db.session.commit()
+        return run
+
+    def obter_run(self, run_id):
+        run = (
+            RunDiario.query.join(Jogo)
+            .filter(RunDiario.id == run_id, Jogo.usuario_id == self.usuario.id)
+            .first()
+        )
+        if run is None:
+            raise RecursoNaoEncontrado(f"Run {run_id} não encontrada para este usuário.")
+        return run
+
+    def excluir_run(self, run_id):
+        run = self.obter_run(run_id)
+        db.session.delete(run)
+        db.session.commit()
+
+    # ------------------------------------------------------------------ #
+    # Builds
+    # ------------------------------------------------------------------ #
+    def listar_builds(self):
+        return (
+            BuildAnotacao.query.join(Jogo)
+            .filter(Jogo.usuario_id == self.usuario.id)
+            .order_by(BuildAnotacao.id.desc())
+            .all()
+        )
+
+    def registrar_build(self, dados):
+        jogo = self.obter_jogo(dados.get("jogo_id"))
+        nome_build = (dados.get("nome_build") or "").strip()
+        if not nome_build:
+            raise ErroDeValidacao("O nome da build é obrigatório.")
+
+        build = BuildAnotacao(
+            jogo_id=jogo.id,
+            nome_build=nome_build,
+            detalhes_equipamento=(dados.get("detalhes_equipamento") or "").strip(),
+            habilidades=(dados.get("habilidades") or "").strip(),
+        )
+        db.session.add(build)
+        db.session.commit()
+        return build
+
+    def obter_build(self, build_id):
+        build = (
+            BuildAnotacao.query.join(Jogo)
+            .filter(BuildAnotacao.id == build_id, Jogo.usuario_id == self.usuario.id)
+            .first()
+        )
+        if build is None:
+            raise RecursoNaoEncontrado(f"Build {build_id} não encontrada para este usuário.")
+        return build
+
+    def excluir_build(self, build_id):
+        build = self.obter_build(build_id)
+        db.session.delete(build)
+        db.session.commit()

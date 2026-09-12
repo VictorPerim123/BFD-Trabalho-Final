@@ -29,7 +29,7 @@ def create_app(config_class=Config):
     _registrar_context_processors(app)
 
     with app.app_context():
-        from app import models  
+        from app import models
         db.create_all()
 
     return app
@@ -39,10 +39,14 @@ def _registrar_blueprints(app):
     from app.routes.pages import pages_bp
     from app.routes.auth import auth_bp
     from app.routes.api_jogos import api_jogos_bp
+    from app.routes.api_runs import api_runs_bp
+    from app.routes.api_builds import api_builds_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_jogos_bp)
+    app.register_blueprint(api_runs_bp)
+    app.register_blueprint(api_builds_bp)
 
 
 def _registrar_error_handlers(app):

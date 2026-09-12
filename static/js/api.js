@@ -1,14 +1,14 @@
 const SavePointAPI = (() => {
   const ENDPOINTS = {
     games: "/api/jogos",
+    runs: "/api/runs",
+    builds: "/api/builds",
   };
 
   async function requisitar(url, options = {}) {
     const res = await fetch(url, {
       credentials: "same-origin",
-      headers: options.body
-        ? { "Content-Type": "application/json" }
-        : undefined,
+      headers: options.body ? { "Content-Type": "application/json" } : undefined,
       ...options,
     });
 
@@ -22,13 +22,17 @@ const SavePointAPI = (() => {
       try {
         const corpo = await res.json();
         if (corpo && corpo.erro) mensagem = corpo.erro;
-      } catch {}
+      } catch {
+        /* resposta sem corpo JSON */
+      }
       throw new Error(mensagem);
     }
 
     if (res.status === 204) return null;
     return res.json();
   }
+
+  /* ---------------------- Jogos / Backlog ---------------------- */
 
   function getGames() {
     return requisitar(ENDPOINTS.games);
@@ -51,5 +55,49 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.games}/${id}`, { method: "DELETE" });
   }
 
-  return { getGames, saveGame, deleteGame };
+  /* ---------------------- Runs (roguelike) ---------------------- */
+
+  function getRuns() {
+    return requisitar(ENDPOINTS.runs);
+  }
+
+  function saveRun(run) {
+    return requisitar(ENDPOINTS.runs, {
+      method: "POST",
+      body: JSON.stringify(run),
+    });
+  }
+
+  function deleteRun(id) {
+    return requisitar(`${ENDPOINTS.runs}/${id}`, { method: "DELETE" });
+  }
+
+  /* ---------------------- Builds ---------------------- */
+
+  function getBuilds() {
+    return requisitar(ENDPOINTS.builds);
+  }
+
+  function saveBuild(build) {
+    return requisitar(ENDPOINTS.builds, {
+      method: "POST",
+      body: JSON.stringify(build),
+    });
+  }
+
+  function deleteBuild(id) {
+    return requisitar(`${ENDPOINTS.builds}/${id}`, { method: "DELETE" });
+  }
+
+  return {
+    getGames,
+    saveGame,
+    deleteGame,
+    getRuns,
+    saveRun,
+    deleteRun,
+    getBuilds,
+    saveBuild,
+    deleteBuild,
+  };
 })();
