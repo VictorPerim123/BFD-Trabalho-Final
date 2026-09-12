@@ -100,6 +100,7 @@
       </div>
       <div class="game-card__actions">
         <button type="button" class="btn btn-ghost btn-sm" data-action="edit">Editar</button>
+        <a class="btn btn-ghost btn-sm" href="/runs/novo?jogo_id=${game.id}">Nova Run</a>
         <button type="button" class="btn btn-danger-outline btn-sm" data-action="delete">Excluir</button>
       </div>
     `;

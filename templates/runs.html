@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Runs{% endblock %}
+
+{% block content %}
+  <header class="page-topbar">
+    <h1>Minhas Runs</h1>
+    <div class="topbar-actions">
+      <a class="btn btn-primary" href="{{ url_for('pages.run_form') }}">+ Registrar run</a>
+    </div>
+  </header>
+
+  <form class="filters-bar" aria-label="Filtrar runs" onsubmit="return false;">
+    <label for="run-jogo-filter" class="visually-hidden">Filtrar por jogo</label>
+    <select id="run-jogo-filter">
+      <option value="">Jogo: todos</option>
+    </select>
+
+    <label for="run-resultado-filter" class="visually-hidden">Filtrar por resultado</label>
+    <select id="run-resultado-filter">
+      <option value="">Resultado: todos</option>
+      <option value="vitoria">Vitória</option>
+      <option value="derrota">Derrota</option>
+    </select>
+  </form>
+
+  <section aria-labelledby="titulo-runs">
+    <h2 id="titulo-runs" class="visually-hidden">Histórico de runs registradas</h2>
+    <div class="builds-grid" id="runs-grid"></div>
+    <p class="empty-state" id="empty-state" hidden>
+      Nenhuma run encontrada com os filtros atuais.
+    </p>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/runs.js') }}"></script>
+{% endblock %}

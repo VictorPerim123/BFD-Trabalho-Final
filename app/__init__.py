@@ -13,6 +13,24 @@ NAV_ITEMS = [
         "short_label": "Backlog",
         "icon": "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
     },
+    {
+        "endpoint": "pages.run_form",
+        "label": "Registrar Run",
+        "short_label": "Nova Run",
+        "icon": "M13 2L3 14h6l-1 8 11-14h-7z",
+    },
+    {
+        "endpoint": "pages.runs",
+        "label": "Minhas Runs",
+        "short_label": "Runs",
+        "icon": "M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z",
+    },
+    {
+        "endpoint": "pages.builds",
+        "label": "Minhas Builds",
+        "short_label": "Builds",
+        "icon": "M22 6.5a4.5 4.5 0 01-6.36 4.1L9.5 16.7a2 2 0 11-2.83-2.83l6.1-6.14A4.5 4.5 0 1122 6.5z",
+    },
 ]
 
 
@@ -29,7 +47,7 @@ def create_app(config_class=Config):
     _registrar_context_processors(app)
 
     with app.app_context():
-        from app import models
+        from app import models  
         db.create_all()
 
     return app

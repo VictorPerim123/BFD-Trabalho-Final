@@ -17,18 +17,24 @@
     try {
       const games = await SavePointAPI.getGames();
       gameSelect.innerHTML = games
-        .map((g) => `<option value="${g.id}">${SavePointUI.escapeHtml(g.titulo)}</option>`)
+        .map(
+          (g) =>
+            `<option value="${g.id}">${SavePointUI.escapeHtml(g.titulo)}</option>`,
+        )
         .join("");
 
       if (preselectedId) {
         gameSelect.value = preselectedId;
       }
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar a lista de jogos.", { isError: true });
+      SavePointUI.showToast("Não foi possível carregar a lista de jogos.", {
+        isError: true,
+      });
       console.error(err);
     }
   }
 
+  // Causa da morte so e relevante em caso de derrota
   function toggleCausaMorte() {
     const resultado = form.elements.resultado.value;
     causaWrapper.hidden = resultado !== "derrota";
@@ -78,20 +84,29 @@
       data: dateInput.value,
       tempo_duracao: form.elements.tempo.value,
       resultado: form.elements.resultado.value,
-      causa_morte: form.elements.resultado.value === "derrota" ? causaField.value.trim() || null : null,
+      causa_morte:
+        form.elements.resultado.value === "derrota"
+          ? causaField.value.trim() || null
+          : null,
     };
 
-    await SavePointAPI.saveRun(payload);
-    SavePointUI.showToast("Run salva com sucesso!");
-    form.reset();
-    dateInput.value = todayISO();
-    toggleCausaMorte();
-    gameSelect.focus();
+    try {
+      await SavePointAPI.saveRun(payload);
+      SavePointUI.showToast("Run salva com sucesso!");
+      form.reset();
+      dateInput.value = todayISO();
+      toggleCausaMorte();
+      gameSelect.focus();
+    } catch (err) {
+      SavePointUI.showToast(err.message || "Não foi possível salvar a run.", {
+        isError: true,
+      });
+    }
   }
 
-  form.querySelectorAll('input[name="resultado"]').forEach((input) =>
-    input.addEventListener("change", toggleCausaMorte)
-  );
+  form
+    .querySelectorAll('input[name="resultado"]')
+    .forEach((input) => input.addEventListener("change", toggleCausaMorte));
   form.addEventListener("submit", handleSubmit);
 
   dateInput.value = todayISO();
