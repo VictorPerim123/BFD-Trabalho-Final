@@ -8,6 +8,12 @@ from app.extensions import db
 
 NAV_ITEMS = [
     {
+        "endpoint": "pages.dashboard",
+        "label": "Dashboard",
+        "short_label": "Painel",
+        "icon": "M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z",
+    },
+    {
         "endpoint": "pages.backlog",
         "label": "Meu Backlog",
         "short_label": "Backlog",
@@ -59,12 +65,14 @@ def _registrar_blueprints(app):
     from app.routes.api_jogos import api_jogos_bp
     from app.routes.api_runs import api_runs_bp
     from app.routes.api_builds import api_builds_bp
+    from app.routes.api_estatisticas import api_estatisticas_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_jogos_bp)
     app.register_blueprint(api_runs_bp)
     app.register_blueprint(api_builds_bp)
+    app.register_blueprint(api_estatisticas_bp)
 
 
 def _registrar_error_handlers(app):

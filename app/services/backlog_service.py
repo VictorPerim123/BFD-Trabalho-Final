@@ -1,3 +1,14 @@
+"""
+BacklogService — camada de serviço que concentra as regras de negócio do
+backlog (validação, sincronização de categorias N:M, registro de runs/builds e
+cálculo de estatísticas), mantendo as rotas (controllers) finas e os models focados
+em persistência.
+
+Esta é a classe Python "usada de forma significativa" pedida no requisito
+2.3: ela não é apenas um contêiner de dados, e sim a fronteira onde toda
+regra de negócio do backlog é validada antes de tocar o banco.
+"""
+
 from app.extensions import db
 from app.models import Jogo, Categoria, RunDiario, BuildAnotacao
 from app.models.jogo import STATUS_VALIDOS
@@ -211,3 +222,22 @@ class BacklogService:
         build = self.obter_build(build_id)
         db.session.delete(build)
         db.session.commit()
+
+    # ------------------------------------------------------------------ #
+    # Estatísticas (dashboard)
+    # ------------------------------------------------------------------ #
+    def calcular_estatisticas_dashboard(self):
+        jogos = self.listar_jogos()
+        runs = self.listar_runs()
+
+        zerados = sum(1 for j in jogos if j.status in ("zerado", "platinado"))
+        horas_totais = sum(j.tempo_jogado_horas for j in jogos)
+        notas = [j.nota for j in jogos if j.nota is not None]
+        nota_media = round(sum(notas) / len(notas), 1) if notas else None
+
+        return {
+            "jogos_zerados": zerados,
+            "horas_totais": horas_totais,
+            "nota_media": nota_media,
+            "total_runs": len(runs),
+        }

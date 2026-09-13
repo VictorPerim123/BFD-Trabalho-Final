@@ -3,12 +3,15 @@ const SavePointAPI = (() => {
     games: "/api/jogos",
     runs: "/api/runs",
     builds: "/api/builds",
+    estatisticas: "/api/estatisticas",
   };
 
   async function requisitar(url, options = {}) {
     const res = await fetch(url, {
       credentials: "same-origin",
-      headers: options.body ? { "Content-Type": "application/json" } : undefined,
+      headers: options.body
+        ? { "Content-Type": "application/json" }
+        : undefined,
       ...options,
     });
 
@@ -23,7 +26,7 @@ const SavePointAPI = (() => {
         const corpo = await res.json();
         if (corpo && corpo.erro) mensagem = corpo.erro;
       } catch {
-        /* resposta sem corpo JSON */
+        /* resposta sem corpo JSON (ex.: 500 simples) */
       }
       throw new Error(mensagem);
     }
@@ -89,6 +92,12 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.builds}/${id}`, { method: "DELETE" });
   }
 
+  /* ---------------------- Estatísticas (dashboard) ---------------------- */
+
+  function getEstatisticas() {
+    return requisitar(ENDPOINTS.estatisticas);
+  }
+
   return {
     getGames,
     saveGame,
@@ -99,5 +108,6 @@ const SavePointAPI = (() => {
     getBuilds,
     saveBuild,
     deleteBuild,
+    getEstatisticas,
   };
 })();

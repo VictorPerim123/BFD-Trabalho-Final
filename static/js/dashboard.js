@@ -7,38 +7,34 @@
 
   async function loadDashboard() {
     try {
-      const [games, runs] = await Promise.all([
+      const [stats, games] = await Promise.all([
+        SavePointAPI.getEstatisticas(),
         SavePointAPI.getGames(),
-        SavePointAPI.getRuns(),
       ]);
-      renderStats(games, runs);
+      renderStats(stats);
       renderRecent(games);
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar o dashboard.", { isError: true });
+      SavePointUI.showToast("Não foi possível carregar o dashboard.", {
+        isError: true,
+      });
       console.error(err);
     }
   }
 
-  function renderStats(games, runs) {
-    const zerados = games.filter((g) => ["zerado", "platinado"].includes(g.status)).length;
-    const horasTotais = games.reduce((sum, g) => sum + (g.tempo_jogado_horas || 0), 0);
-    const notas = games.map((g) => g.nota).filter((n) => typeof n === "number");
-    const mediaNota = notas.length ? (notas.reduce((a, b) => a + b, 0) / notas.length).toFixed(1) : "—";
-
-    elZerados.textContent = zerados;
-    elHoras.textContent = SavePointUI.formatHoras(horasTotais);
-    elNota.textContent = mediaNota;
-    elRuns.textContent = runs.length;
+  function renderStats(stats) {
+    elZerados.textContent = stats.jogos_zerados;
+    elHoras.textContent = SavePointUI.formatHoras(stats.horas_totais);
+    elNota.textContent = stats.nota_media != null ? stats.nota_media : "—";
+    elRuns.textContent = stats.total_runs;
   }
 
   function renderRecent(games) {
-    const recentes = [...games]
-      .filter((g) => g.status === "jogando")
-      .slice(0, 4);
+    const recentes = games.filter((g) => g.status === "jogando").slice(0, 4);
 
     recentList.innerHTML = "";
     if (recentes.length === 0) {
-      recentList.innerHTML = '<li class="empty-state">Nenhum jogo em andamento.</li>';
+      recentList.innerHTML =
+        '<li class="empty-state">Nenhum jogo em andamento.</li>';
       return;
     }
 

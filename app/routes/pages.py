@@ -1,4 +1,3 @@
-
 from flask import Blueprint, render_template, redirect, url_for
 
 from app.utils.auth import login_required
@@ -8,7 +7,13 @@ pages_bp = Blueprint("pages", __name__)
 
 @pages_bp.route("/")
 def raiz():
-    return redirect(url_for("pages.backlog"))
+    return redirect(url_for("pages.dashboard"))
+
+
+@pages_bp.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
 
 
 @pages_bp.route("/backlog")
