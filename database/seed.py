@@ -1,16 +1,20 @@
+import logging
 import os
 import sys
 from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from dotenv import load_dotenv  
+from dotenv import load_dotenv
 
 load_dotenv()
 
-from app import create_app 
-from app.extensions import db  
-from app.models import Usuario, Jogo, Categoria, RunDiario, BuildAnotacao  
+from app import create_app
+from app.extensions import db
+from app.models import Usuario, Jogo, Categoria, RunDiario, BuildAnotacao
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+log = logging.getLogger("seed")
 
 JOGOS_EXEMPLO = [
     {
@@ -85,19 +89,18 @@ def seed():
     app = create_app()
     with app.app_context():
         if Usuario.query.filter_by(username="demo").first():
-            print("Usuário 'demo' já existe — banco já semeado. Nada a fazer.")
+            log.info("Usuário 'demo' já existe — banco já semeado. Nada a fazer.")
             return
 
         usuario = Usuario(nome="Jogador Demo", username="demo", email="demo@savepoint.dev")
         usuario.set_senha("SavePoint123")
         db.session.add(usuario)
-        db.session.flush()  
+        db.session.flush()
 
         categorias_cache = {}
         jogos_por_titulo = {}
 
         for dados_originais in JOGOS_EXEMPLO:
-            
             dados = dict(dados_originais)
             categorias_nomes = dados.pop("categorias")
             jogo = Jogo(usuario_id=usuario.id, **dados)
@@ -137,8 +140,8 @@ def seed():
             db.session.add(build)
 
         db.session.commit()
-        print("Banco semeado com sucesso.")
-        print("Login de demonstração -> usuário: demo | senha: SavePoint123")
+        log.info("Banco semeado com sucesso.")
+        log.info("Login de demonstração -> usuário: demo | senha: SavePoint123")
 
 
 if __name__ == "__main__":

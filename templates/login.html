@@ -17,6 +17,7 @@
       {% endif %}
 
       <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="field">
           <label for="login-usuario">Usuário ou e-mail</label>
           <input type="text" id="login-usuario" name="usuario" autocomplete="username" required />

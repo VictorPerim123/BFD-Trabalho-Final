@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SavePoint — {% block title %}{% endblock %}</title>
   <meta name="description" content="{% block description %}Organizador de backlog de jogos e runs de roguelike.{% endblock %}" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -41,6 +42,7 @@
         {% if usuario_logado %}
         <p class="hint" style="margin-bottom: var(--space-2);">{{ usuario_logado.nome }}</p>
         <form action="{{ url_for('auth.logout') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <button type="submit" class="btn btn-ghost btn-sm btn-block">
             <span class="nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="20" height="20" focusable="false"><path fill="currentColor" d="M10 3v2H5v14h5v2H3V3zM16.17 12l-3.58-3.59L14 7l6 5-6 5-1.41-1.41L16.17 13H9v-1z"/></svg>

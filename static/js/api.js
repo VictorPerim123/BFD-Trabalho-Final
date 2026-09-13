@@ -6,13 +6,21 @@ const SavePointAPI = (() => {
     estatisticas: "/api/estatisticas",
   };
 
+  function tokenCsrf() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute("content") : "";
+  }
+
   async function requisitar(url, options = {}) {
+    const metodo = (options.method || "GET").toUpperCase();
+    const headers = {};
+    if (options.body) headers["Content-Type"] = "application/json";
+    if (metodo !== "GET") headers["X-CSRFToken"] = tokenCsrf();
+
     const res = await fetch(url, {
       credentials: "same-origin",
-      headers: options.body
-        ? { "Content-Type": "application/json" }
-        : undefined,
       ...options,
+      headers: { ...headers, ...(options.headers || {}) },
     });
 
     if (res.status === 401) {
@@ -26,7 +34,7 @@ const SavePointAPI = (() => {
         const corpo = await res.json();
         if (corpo && corpo.erro) mensagem = corpo.erro;
       } catch {
-        /* resposta sem corpo JSON (ex.: 500 simples) */
+        /* resposta sem corpo JSON */
       }
       throw new Error(mensagem);
     }

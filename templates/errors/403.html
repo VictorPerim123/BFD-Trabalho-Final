@@ -1,0 +1,16 @@
+{% extends "base_publico.html" %}
+
+{% block title %}Acesso negado{% endblock %}
+
+{% block content %}
+    <section class="card" style="max-width: 460px; text-align:center;">
+      <div class="brand" style="justify-content:center;">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Save<span class="brand-accent">Point</span>
+      </div>
+      <h1>403 — Acesso negado</h1>
+      <p>Você não tem permissão para acessar este recurso. Se o formulário ficou
+         aberto por muito tempo, recarregue a página e tente de novo.</p>
+      <a class="btn btn-primary" href="{{ url_for('pages.raiz') }}">Voltar ao início</a>
+    </section>
+{% endblock %}

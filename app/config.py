@@ -18,13 +18,14 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "0") == "1"
+    STEAM_API_KEY = os.environ.get("STEAM_API_KEY", "")
 
 
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     WTF_CSRF_ENABLED = False
-
     SQLALCHEMY_ENGINE_OPTIONS = {
         "poolclass": StaticPool,
         "connect_args": {"check_same_thread": False},

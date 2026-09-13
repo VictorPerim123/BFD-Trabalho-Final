@@ -1,9 +1,10 @@
+import logging
 import os
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template, request
 
 from app.config import Config
-from app.extensions import db
+from app.extensions import csrf, db
 
 
 NAV_ITEMS = [
@@ -47,13 +48,15 @@ def create_app(config_class=Config):
     os.makedirs(os.path.join(app.root_path, "..", "instance"), exist_ok=True)
 
     db.init_app(app)
+    csrf.init_app(app)
 
+    _configurar_logs(app)
     _registrar_blueprints(app)
     _registrar_error_handlers(app)
     _registrar_context_processors(app)
 
     with app.app_context():
-        from app import models  
+        from app import models
         db.create_all()
 
     return app
@@ -66,6 +69,8 @@ def _registrar_blueprints(app):
     from app.routes.api_runs import api_runs_bp
     from app.routes.api_builds import api_builds_bp
     from app.routes.api_estatisticas import api_estatisticas_bp
+    from app.routes.steam import steam_bp
+    from app.routes.export import export_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp)
@@ -73,9 +78,33 @@ def _registrar_blueprints(app):
     app.register_blueprint(api_runs_bp)
     app.register_blueprint(api_builds_bp)
     app.register_blueprint(api_estatisticas_bp)
+    app.register_blueprint(steam_bp)
+    app.register_blueprint(export_bp)
+
+
+def _configurar_logs(app):
+    nivel = logging.DEBUG if app.debug or app.testing else logging.INFO
+    logging.basicConfig(
+        level=nivel,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+    app.logger.setLevel(nivel)
 
 
 def _registrar_error_handlers(app):
+    from flask_wtf.csrf import CSRFError
+
+    @app.errorhandler(CSRFError)
+    def csrf_invalido(_erro):
+        app.logger.warning("Requisição rejeitada por CSRF: %s %s", request.method, request.path)
+        if request.path.startswith("/api/"):
+            return jsonify({"erro": "Token CSRF ausente ou expirado."}), 400
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(403)
+    def acesso_negado(_erro):
+        return render_template("errors/403.html"), 403
+
     @app.errorhandler(404)
     def nao_encontrado(_erro):
         return render_template("errors/404.html"), 404

@@ -6,6 +6,8 @@
   <header class="page-topbar">
     <h1>Meu Backlog</h1>
     <div class="topbar-actions">
+      <a class="btn btn-ghost" href="{{ url_for('export.exportar_backlog') }}">Exportar HTML</a>
+      <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}">Importar da Steam</a>
       <button type="button" class="btn btn-primary" id="btn-add-game">+ Adicionar jogo</button>
     </div>
   </header>
