@@ -1,3 +1,7 @@
+"""
+Jogo — item do backlog de um usuário. Núcleo do domínio do SavePoint.
+"""
+
 from datetime import datetime, timezone
 
 from app.extensions import db
@@ -34,6 +38,16 @@ class Jogo(db.Model):
     builds = db.relationship("BuildAnotacao", backref="jogo", cascade="all, delete-orphan", lazy="dynamic")
 
     @property
+    def capa_url(self):
+        """URL da capa vertical da biblioteca Steam quando o jogo possui AppID."""
+        if self.steam_appid is None:
+            return None
+        return (
+            "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/"
+            f"{self.steam_appid}/library_600x900_2x.jpg"
+        )
+
+    @property
     def percentual_conquistas(self):
         """Percentual de conquistas obtidas (0 quando o jogo não rastreia conquistas)."""
         if not self.total_conquistas:
@@ -52,6 +66,7 @@ class Jogo(db.Model):
             "percentual_conquistas": self.percentual_conquistas,
             "categorias": [c.nome for c in self.categorias],
             "steam_appid": self.steam_appid,
+            "capa_url": self.capa_url,
         }
 
     def __repr__(self):

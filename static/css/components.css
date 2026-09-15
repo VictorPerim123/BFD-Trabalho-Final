@@ -1,3 +1,7 @@
+/* =========================================================
+   components.css — componentes reutilizáveis do SavePoint
+   ========================================================= */
+
 /* ---------- Botões ---------- */
 .btn {
   display: inline-flex;
@@ -10,7 +14,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.05s ease;
-  min-height: 44px;
+  min-height: 44px; /* alvo de toque acessível */
 }
 .btn:active { transform: translateY(1px); }
 
@@ -61,6 +65,14 @@
   overflow: hidden;
 }
 .game-card__cover img { width: 100%; height: 100%; object-fit: cover; }
+.game-card__cover-placeholder {
+  color: var(--text-muted);
+}
+.game-card__playtime {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
 .game-card__title {
   font-family: var(--font-display);
   font-size: 1.05rem;
@@ -104,7 +116,7 @@
 .badge--abandonado { color: var(--accent-danger); border-color: var(--accent-danger); }
 .badge--quero-jogar { color: var(--text-secondary); }
 
-/* ---------- Barra de progresso (conquistas) ---------- */
+/* ---------- Barra de progresso (conquistas) — visual "HUD" ---------- */
 .progress-label {
   display: flex;
   justify-content: space-between;
@@ -169,6 +181,8 @@
   min-height: 1em;
 }
 
+/* Grupo de opções estilo "toggle" (ex: Vitória / Derrota), acessível
+   via <fieldset>/radio nativos, apenas estilizados como botões */
 .toggle-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -215,7 +229,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- Cartão genérico ---------- */
+/* ---------- Cartão genérico (usado no dashboard/builds/login) ---------- */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);

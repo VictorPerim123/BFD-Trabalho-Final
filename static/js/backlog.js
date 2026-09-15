@@ -1,3 +1,9 @@
+/**
+ * backlog.js — lógica da página de Backlog (endpoint otimizado para desktop).
+ * Busca os jogos via SavePointAPI (fetch assíncrono) e renderiza o grid
+ * sem recarregar a página. Filtros e busca são aplicados no cliente.
+ */
+
 (function () {
   const grid = document.getElementById("games-grid");
   const emptyState = document.getElementById("empty-state");
@@ -19,28 +25,18 @@
       populateCategoryFilter(allGames);
       renderGames();
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar o backlog agora.", {
-        isError: true,
-      });
+      SavePointUI.showToast("Não foi possível carregar o backlog agora.", { isError: true });
       console.error(err);
     }
   }
 
   function populateCategoryFilter(games) {
     const categorias = new Set();
-    games.forEach((g) =>
-      (g.categorias || []).forEach((c) => categorias.add(c)),
-    );
+    games.forEach((g) => (g.categorias || []).forEach((c) => categorias.add(c)));
     const current = categoryFilter.value;
     categoryFilter.innerHTML =
       '<option value="">Categoria: todas</option>' +
-      [...categorias]
-        .sort()
-        .map(
-          (c) =>
-            `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`,
-        )
-        .join("");
+      [...categorias].sort().map((c) => `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`).join("");
     categoryFilter.value = current;
   }
 
@@ -52,8 +48,7 @@
     return allGames.filter((g) => {
       const matchesTerm = !term || g.titulo.toLowerCase().includes(term);
       const matchesStatus = !status || g.status === status;
-      const matchesCategoria =
-        !categoria || (g.categorias || []).includes(categoria);
+      const matchesCategoria = !categoria || (g.categorias || []).includes(categoria);
       return matchesTerm && matchesStatus && matchesCategoria;
     });
   }
@@ -71,6 +66,11 @@
     games.forEach((game) => grid.appendChild(renderCard(game)));
   }
 
+  function formatPlaytime(hours) {
+    const value = Number(hours) || 0;
+    return `${value} h jogada${value === 1 ? "" : "s"}`;
+  }
+
   function renderCard(game) {
     const pct = game.total_conquistas
       ? Math.round((game.conquistas_obtidas / game.total_conquistas) * 100)
@@ -81,14 +81,22 @@
     article.setAttribute("aria-label", game.titulo);
 
     article.innerHTML = `
-      <div class="game-card__cover" role="img" aria-label="Capa não disponível para ${SavePointUI.escapeHtml(game.titulo)}">
-        Sem capa
+      <div class="game-card__cover">
+        ${
+          game.capa_url
+            ? `<img src="${SavePointUI.escapeHtml(game.capa_url)}"
+                    alt="Capa de ${SavePointUI.escapeHtml(game.titulo)}"
+                    loading="lazy" decoding="async" data-cover-image>`
+            : ""
+        }
+        <span class="game-card__cover-placeholder" ${game.capa_url ? "hidden" : ""}>Sem capa</span>
       </div>
       <h3 class="game-card__title">${SavePointUI.escapeHtml(game.titulo)}</h3>
       <div class="game-card__meta">
         <span class="badge ${SavePointUI.statusBadgeClass(game.status)}">${SavePointUI.statusLabel(game.status)}</span>
         ${game.nota != null ? `<span class="game-card__rating">★ ${game.nota}</span>` : ""}
       </div>
+      <div class="game-card__playtime">${formatPlaytime(game.tempo_jogado_horas)}</div>
       <div>
         <div class="progress-label">
           <span>Conquistas</span>
@@ -105,12 +113,16 @@
       </div>
     `;
 
-    article
-      .querySelector('[data-action="edit"]')
-      .addEventListener("click", () => openForm(game));
-    article
-      .querySelector('[data-action="delete"]')
-      .addEventListener("click", () => handleDelete(game));
+    const coverImage = article.querySelector("[data-cover-image]");
+    if (coverImage) {
+      coverImage.addEventListener("error", () => {
+        coverImage.hidden = true;
+        article.querySelector(".game-card__cover-placeholder").hidden = false;
+      });
+    }
+
+    article.querySelector('[data-action="edit"]').addEventListener("click", () => openForm(game));
+    article.querySelector('[data-action="delete"]').addEventListener("click", () => handleDelete(game));
 
     return article;
   }
@@ -163,23 +175,17 @@
     };
 
     if (payload.conquistas_obtidas > payload.total_conquistas) {
-      SavePointUI.showToast("Conquistas obtidas não podem passar do total.", {
-        isError: true,
-      });
+      SavePointUI.showToast("Conquistas obtidas não podem passar do total.", { isError: true });
       return;
     }
 
     try {
       await SavePointAPI.saveGame(payload);
-      SavePointUI.showToast(
-        editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.",
-      );
+      SavePointUI.showToast(editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.");
       closeForm();
       await loadGames();
     } catch (err) {
-      SavePointUI.showToast(err.message || "Não foi possível salvar o jogo.", {
-        isError: true,
-      });
+      SavePointUI.showToast(err.message || "Não foi possível salvar o jogo.", { isError: true });
     }
   }
 
@@ -191,9 +197,7 @@
       SavePointUI.showToast("Jogo removido.");
       await loadGames();
     } catch (err) {
-      SavePointUI.showToast(err.message || "Não foi possível remover o jogo.", {
-        isError: true,
-      });
+      SavePointUI.showToast(err.message || "Não foi possível remover o jogo.", { isError: true });
     }
   }
 
