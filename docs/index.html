@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SavePoint — organizador de backlog de jogos</title>
+<meta name="description" content="SavePoint: aplicação web para organizar backlog de jogos, histórico de runs de roguelike e anotações de build. Projeto Integrador em Flask, PostgreSQL e JavaScript vanilla." />
+<style>
+  :root{
+    color-scheme: dark;
+    --bg-base:#14121f; --bg-surface:#1e1b2e; --bg-surface-alt:#272238;
+    --border:#3a3552; --text:#f4f2fa; --text-2:#b9b4cc;
+    --accent:#8b5cf6; --accent-2:#a78bfa; --success:#4ade80; --gold:#fbbf24;
+    --radius:12px; --max:1040px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg-base); color:var(--text);
+    font-family:Inter,"Segoe UI",system-ui,sans-serif; line-height:1.65;
+  }
+  a{color:var(--accent-2);}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--accent-2); outline-offset:3px;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 1.25rem;}
+  header.hero{
+    padding:4.5rem 0 3.5rem;
+    background:radial-gradient(1200px 400px at 50% -10%, rgba(139,92,246,.28), transparent 70%);
+    border-bottom:1px solid var(--border); text-align:center;
+  }
+  .brand{font-family:"Space Grotesk",Inter,sans-serif; font-weight:700; font-size:1.15rem; letter-spacing:.02em;}
+  .brand span{color:var(--accent-2);}
+  h1{font-family:"Space Grotesk",Inter,sans-serif; font-size:clamp(2rem,5vw,3.1rem); margin:.6rem 0 .4rem; line-height:1.15;}
+  .tagline{color:var(--text-2); font-size:1.1rem; max-width:640px; margin:0 auto 2rem;}
+  .btn{
+    display:inline-block; padding:.75rem 1.4rem; border-radius:8px; font-weight:600;
+    text-decoration:none; border:1px solid var(--border); margin:.3rem;
+  }
+  .btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .btn-primary:hover{background:var(--accent-2);}
+  .btn-ghost{color:var(--text);}
+  .btn-ghost:hover{background:var(--bg-surface-alt);}
+  main section{padding:3.25rem 0; border-bottom:1px solid var(--border);}
+  h2{font-family:"Space Grotesk",Inter,sans-serif; font-size:1.6rem; margin:0 0 1.25rem;}
+  h3{font-size:1.05rem; margin:0 0 .4rem;}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.25rem;}
+  .card{background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem;}
+  .card p{color:var(--text-2); margin:0;}
+  figure{margin:0 0 1.5rem;}
+  figure img{width:100%; height:auto; border:1px solid var(--border); border-radius:var(--radius); display:block; background:var(--bg-surface);}
+  figcaption{color:var(--text-2); font-size:.9rem; margin-top:.5rem;}
+  .shots{display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; align-items:start;}
+  ul.plain{list-style:none; padding:0; margin:0;}
+  ul.plain li{padding:.55rem 0; border-bottom:1px solid var(--border); color:var(--text-2);}
+  ul.plain li:last-child{border-bottom:none;}
+  ul.plain strong{color:var(--text);}
+  code,pre{font-family:"JetBrains Mono",ui-monospace,monospace;}
+  pre{
+    background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:1.1rem; overflow-x:auto; font-size:.9rem; color:var(--text);
+  }
+  .badge{
+    display:inline-block; padding:.2rem .65rem; border-radius:999px; font-size:.75rem;
+    font-weight:700; text-transform:uppercase; border:1px solid var(--border); color:var(--text-2);
+  }
+  footer{padding:2.5rem 0 3.5rem; color:var(--text-2); text-align:center; font-size:.9rem;}
+  @media (max-width:720px){ .shots{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="brand">Save<span>Point</span></p>
+    <h1>Seu backlog de jogos, finalmente organizado</h1>
+    <p class="tagline">
+      Uma aplicação web para registrar o que você está jogando, acompanhar
+      conquistas, guardar o histórico das suas runs de roguelike e anotar builds
+      complexas — sem depender de planilha, bloco de notas ou grupo de WhatsApp.
+    </p>
+    <a class="btn btn-primary" href="#funcionalidades">Ver funcionalidades</a>
+    <a class="btn btn-ghost" href="#como-rodar">Como executar</a>
+  </div>
+</header>
+
+<main>
+  <section id="funcionalidades">
+    <div class="wrap">
+      <h2>O que dá para fazer</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Backlog visual</h3>
+          <p>Cadastre jogos com status, nota pessoal e categorias próprias. Busque e filtre sem recarregar a página.</p>
+        </article>
+        <article class="card">
+          <h3>Progresso de conquistas</h3>
+          <p>Registre troféus obtidos e totais; a barra de progresso mostra a porcentagem de conclusão de cada jogo.</p>
+        </article>
+        <article class="card">
+          <h3>Histórico de runs</h3>
+          <p>Anote cada tentativa com duração, resultado e causa da morte — e veja sua evolução ao longo do tempo.</p>
+        </article>
+        <article class="card">
+          <h3>Anotações de build</h3>
+          <p>Guarde equipamento e distribuição de habilidades para não perder o raciocínio entre sessões longas de RPG.</p>
+        </article>
+        <article class="card">
+          <h3>Painel de estatísticas</h3>
+          <p>Jogos zerados, tempo acumulado, nota média e runs registradas, calculados no servidor.</p>
+        </article>
+        <article class="card">
+          <h3>Exportação offline</h3>
+          <p>Baixe seu backlog como um único arquivo HTML pesquisável, que funciona sem servidor e sem internet.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="telas">
+    <div class="wrap">
+      <h2>Principais telas</h2>
+      <div class="grid">
+        <article class="card"><h3>Backlog</h3><p>Grade de jogos com busca, filtros, progresso de conquistas e ações de edição, run e exclusão.</p></article>
+        <article class="card"><h3>Runs</h3><p>Histórico filtrável por jogo e resultado, com criação, edição e exclusão das tentativas.</p></article>
+        <article class="card"><h3>Builds</h3><p>Anotações de equipamento e habilidades por jogo, também com criação, edição e exclusão.</p></article>
+        <article class="card"><h3>Dashboard</h3><p>Resumo de jogos zerados, horas acumuladas, nota média e total de runs registradas.</p></article>
+      </div>
+      <p style="color:var(--text-2); margin-top:1rem;">Screenshots reais podem ser adicionados em <code>docs/assets/</code> antes da publicação final.</p>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <h2>Como foi construído</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Backend</h3>
+          <ul class="plain">
+            <li><strong>Python + Flask</strong> com application factory e blueprints</li>
+            <li><strong>Jinja2</strong> para renderização das páginas</li>
+            <li><strong>Camada de serviço</strong> com as regras de negócio isoladas</li>
+            <li><strong>SQLAlchemy</strong> — consultas parametrizadas, sem SQL na mão</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Frontend</h3>
+          <ul class="plain">
+            <li><strong>HTML semântico</strong> e <strong>CSS Grid</strong>, sem framework de UI</li>
+            <li><strong>JavaScript vanilla</strong> com <code>fetch()</code> assíncrono</li>
+            <li><strong>Responsivo</strong>: sidebar no desktop, navegação inferior no celular</li>
+            <li><strong>Acessibilidade</strong> com base semântica e checklist de auditoria em <code>docs/ACESSIBILIDADE.md</code></li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Dados e infraestrutura</h3>
+          <ul class="plain">
+            <li><strong>PostgreSQL</strong> (ou SQLite, sem nenhum setup)</li>
+            <li><strong>Docker Compose</strong> para subir tudo com um comando</li>
+            <li><strong>pytest</strong> — 56 testes de regra de negócio e de API</li>
+            <li><strong>Sessão + hash de senha</strong> e proteção CSRF</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-rodar">
+    <div class="wrap">
+      <h2>Como executar</h2>
+      <p>Sem nenhuma configuração: o projeto usa SQLite por padrão.</p>
+<pre><code>git clone &lt;URL_DO_REPOSITORIO&gt;
+cd savepoint
+python -m venv venv &amp;&amp; source venv/bin/activate
+pip install -r requirements.txt
+python database/seed.py
+python run.py</code></pre>
+      <p>
+        Acesse <code>http://localhost:5000</code> e entre com
+        <strong>demo</strong> / <strong>SavePoint123</strong>.
+        Para usar PostgreSQL, rode <code>docker compose up -d db</code> e
+        aponte <code>DATABASE_URL</code> no <code>.env</code>.
+      </p>
+    </div>
+  </section>
+
+  <section id="equipe">
+    <div class="wrap">
+      <h2>Equipe</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Victor Alexandre Silva Perim</h3>
+          <p>Interface responsiva, JavaScript assíncrono, telas de backlog, Flask, modelagem do banco, runs e painel.</p>
+        </article>
+        <article class="card">
+          <h3>Adriano Pereira Silva</h3>
+          <p>Ambiente Flask, modelagem do banco, JavaScript, APIs de runs e builds, integração externa.</p>
+        </article>
+      </div>
+      <p style="margin-top:1.5rem;">
+        <span class="badge">Projeto Integrador</span>
+        Instituto Hardware — desenvolvimento web full stack.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>SavePoint · projeto acadêmico de desenvolvimento web full stack.</p>
+  </div>
+</footer>
+
+</body>
+</html>

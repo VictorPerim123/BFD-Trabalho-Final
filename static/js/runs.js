@@ -133,6 +133,10 @@
     }
   }
 
+  document
+    .getElementById("run-filters-form")
+    .addEventListener("submit", (evento) => evento.preventDefault());
+
   jogoFilter.addEventListener("change", renderRuns);
   resultadoFilter.addEventListener("change", renderRuns);
 

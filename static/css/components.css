@@ -1,8 +1,4 @@
-/* =========================================================
-   components.css — componentes reutilizáveis do SavePoint
-   ========================================================= */
-
-/* ---------- Botões ---------- */
+/*  Botões  */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -14,7 +10,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.05s ease;
-  min-height: 44px; /* alvo de toque acessível */
+  min-height: 44px; 
 }
 .btn:active { transform: translateY(1px); }
 
@@ -39,9 +35,9 @@
 .btn-danger-outline:hover { background: rgba(248, 113, 113, 0.12); }
 
 .btn-block { width: 100%; justify-content: center; }
-.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; min-height: 36px; }
+.btn-sm { padding: 0.4rem 0.75rem; font-size: 0.8rem; min-height: 44px; }
 
-/* ---------- Cards de jogo (grade do backlog) ---------- */
+/*  Cards de jogo (grade do backlog)  */
 .game-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -65,14 +61,6 @@
   overflow: hidden;
 }
 .game-card__cover img { width: 100%; height: 100%; object-fit: cover; }
-.game-card__cover-placeholder {
-  color: var(--text-muted);
-}
-.game-card__playtime {
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-}
 .game-card__title {
   font-family: var(--font-display);
   font-size: 1.05rem;
@@ -96,7 +84,7 @@
 }
 .game-card__actions .btn { flex: 1; }
 
-/* ---------- Badge de status ---------- */
+/* Badge de status  */
 .badge {
   display: inline-block;
   padding: 0.2rem 0.6rem;
@@ -116,7 +104,7 @@
 .badge--abandonado { color: var(--accent-danger); border-color: var(--accent-danger); }
 .badge--quero-jogar { color: var(--text-secondary); }
 
-/* ---------- Barra de progresso (conquistas) — visual "HUD" ---------- */
+/* Barra de progresso (conquistas)   */
 .progress-label {
   display: flex;
   justify-content: space-between;
@@ -137,7 +125,7 @@
   border-radius: 999px;
 }
 
-/* ---------- Formulários ---------- */
+/*  Formulários  */
 .field {
   margin-bottom: var(--space-4);
 }
@@ -181,8 +169,7 @@
   min-height: 1em;
 }
 
-/* Grupo de opções estilo "toggle" (ex: Vitória / Derrota), acessível
-   via <fieldset>/radio nativos, apenas estilizados como botões */
+/* Grupo de opções estilo  Vitória / Derrota*/
 .toggle-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -229,7 +216,7 @@
   outline-offset: 2px;
 }
 
-/* ---------- Cartão genérico (usado no dashboard/builds/login) ---------- */
+/* Cartão genérico */
 .card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -256,7 +243,7 @@
   letter-spacing: 0.03em;
 }
 
-/* ---------- Busca / filtros ---------- */
+/*  Busca / filtros  */
 .filters-bar {
   display: flex;
   gap: var(--space-3);
@@ -282,7 +269,7 @@
   min-height: 44px;
 }
 
-/* ---------- Estado vazio ---------- */
+/*  Estado vazio  */
 .empty-state {
   text-align: center;
   padding: var(--space-8) var(--space-4);
@@ -291,7 +278,7 @@
   border-radius: var(--radius-lg);
 }
 
-/* ---------- Toast (feedback de ações — aria-live) ---------- */
+/*  feedback de ações — aria-live  */
 .toast {
   position: fixed;
   bottom: var(--space-5);
@@ -314,7 +301,7 @@
   }
 }
 
-/* ---------- Lista "jogando agora" (dashboard) ---------- */
+/*  Lista "jogando agora"   */
 .recent-list {
   list-style: none;
   padding: 0;
@@ -332,7 +319,7 @@
   border-radius: var(--radius-md);
 }
 
-/* ---------- Auth (login/registro) ---------- */
+/*  Auth (login/registro)  */
 .auth-card {
   width: 100%;
   max-width: 380px;

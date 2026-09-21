@@ -1,19 +1,20 @@
 :root {
+  /* Paleta — tema  */
   --bg-deep: #14121f;
   --bg-surface: #1e1b2e;
   --bg-surface-alt: #262238;
   --bg-elevated: #2d2843;
   --border-subtle: #3a3552;
 
-  --accent-primary: #a78bfa;
+  --accent-primary: #a78bfa;   
   --accent-primary-dark: #7c3aed;
-  --accent-gold: #fbbf24;
-  --accent-success: #4ade80;
-  --accent-danger: #f87171;
+  --accent-gold: #fbbf24;      
+  --accent-success: #4ade80;   
+  --accent-danger: #f87171;    
 
   --text-primary: #f4f2fa;
   --text-secondary: #a8a3bd;
-  --text-muted: #746e8f;
+  --text-muted: #9d97b5;
 
   --font-display: "Space Grotesk", "Segoe UI", sans-serif;
   --font-body: "Inter", "Segoe UI", sans-serif;
@@ -99,16 +100,20 @@ ul, ol {
   padding-left: 1.25rem;
 }
 
+/*  Acessibilidade: foco sempre visível  */
 :focus-visible {
   outline: 3px solid var(--accent-gold);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
 
+/* Remove o outline padrão apenas quando NÃO é navegação por teclado,
+   mantendo :focus-visible acima como única fonte de indicação de foco */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
+/*  Skip link  */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -124,6 +129,7 @@ ul, ol {
   left: 0;
 }
 
+/*  Utilitário para texto só-leitor-de-tela  */
 .visually-hidden {
   position: absolute !important;
   width: 1px;
