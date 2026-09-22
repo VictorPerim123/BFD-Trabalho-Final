@@ -19,7 +19,7 @@ def login_required(view_func):
     @wraps(view_func)
     def wrapper(*args, **kwargs):
         if usuario_atual() is None:
-            return redirect(url_for("auth.login", proximo=request.path))
+            return redirect(url_for("auth.login", proximo=request.full_path.rstrip("?")))
         return view_func(*args, **kwargs)
 
     return wrapper

@@ -54,10 +54,14 @@ def create_app(config_class=Config):
     _registrar_blueprints(app)
     _registrar_error_handlers(app)
     _registrar_context_processors(app)
+    _registrar_cabecalhos_seguranca(app)
 
     with app.app_context():
         from app import models
+        from app.db_maintenance import aplicar_migracoes_compatibilidade
+
         db.create_all()
+        aplicar_migracoes_compatibilidade()
 
     return app
 
@@ -121,3 +125,12 @@ def _registrar_context_processors(app):
         from app.utils.auth import usuario_atual
 
         return {"nav_items": NAV_ITEMS, "usuario_logado": usuario_atual()}
+
+
+def _registrar_cabecalhos_seguranca(app):
+    @app.after_request
+    def adicionar_cabecalhos(resposta):
+        resposta.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resposta.headers.setdefault("X-Frame-Options", "DENY")
+        resposta.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        return resposta

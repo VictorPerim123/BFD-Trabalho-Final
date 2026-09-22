@@ -8,11 +8,11 @@ from app.models.run_diario import RESULTADOS_VALIDOS
 
 
 class ErroDeValidacao(ValueError):
-    """"""
+    pass
 
 
 class RecursoNaoEncontrado(LookupError):
-    """"""
+    pass
 
 
 class BacklogService:
@@ -236,6 +236,7 @@ class BacklogService:
 
         importados = 0
         vinculados = 0
+        atualizados = 0
         ignorados = 0
 
         try:
@@ -252,27 +253,37 @@ class BacklogService:
                 )
 
                 if appid in por_appid:
-                    ignorados += 1
+                    if self._sincronizar_metadados_steam(por_appid[appid], item, tempo):
+                        atualizados += 1
+                    else:
+                        ignorados += 1
                     continue
 
                 chave_titulo = self._normalizar_texto(titulo)
                 jogo_manual = por_titulo.get(chave_titulo)
                 if jogo_manual is not None and jogo_manual.steam_appid is None:
                     jogo_manual.steam_appid = appid
-                    jogo_manual.tempo_jogado_horas = max(jogo_manual.tempo_jogado_horas, tempo)
+                    self._sincronizar_metadados_steam(jogo_manual, item, tempo)
                     por_appid[appid] = jogo_manual
                     vinculados += 1
                     continue
 
-                jogo = self.criar_jogo(
-                    {
-                        "titulo": titulo,
-                        "status": "quero_jogar",
-                        "tempo_jogado_horas": tempo,
-                        "steam_appid": appid,
-                    },
-                    commit=False,
-                )
+                dados_novo = {
+                    "titulo": titulo,
+                    "status": "quero_jogar",
+                    "tempo_jogado_horas": tempo,
+                    "steam_appid": appid,
+                }
+                if self._conquistas_foram_sincronizadas(item):
+                    dados_novo["total_conquistas"] = self._inteiro_nao_negativo(
+                        item, "total_conquistas", "O total de conquistas"
+                    )
+                    dados_novo["conquistas_obtidas"] = self._inteiro_nao_negativo(
+                        item, "conquistas_obtidas", "As conquistas obtidas"
+                    )
+
+                jogo = self.criar_jogo(dados_novo, commit=False)
+                jogo.capa_url = self._capa_steam(item)
                 por_appid[appid] = jogo
                 por_titulo.setdefault(chave_titulo, jogo)
                 importados += 1
@@ -282,7 +293,57 @@ class BacklogService:
             db.session.rollback()
             raise
 
-        return {"importados": importados, "vinculados": vinculados, "ignorados": ignorados}
+        return {
+            "importados": importados,
+            "vinculados": vinculados,
+            "atualizados": atualizados,
+            "ignorados": ignorados,
+        }
+
+    @staticmethod
+    def _conquistas_foram_sincronizadas(item):
+        if "conquistas_sincronizadas" in item:
+            return bool(item.get("conquistas_sincronizadas"))
+        return "total_conquistas" in item and "conquistas_obtidas" in item
+
+    def _capa_steam(self, item):
+        capa = self._texto(item.get("capa_url"), "A URL da capa", maximo=500)
+        if not capa:
+            return None
+        if not capa.startswith("https://"):
+            raise ErroDeValidacao("A URL da capa retornada pela Steam é inválida.")
+        return capa
+
+    def _sincronizar_metadados_steam(self, jogo, item, tempo):
+        alterado = False
+
+        novo_tempo = max(jogo.tempo_jogado_horas, tempo)
+        if novo_tempo != jogo.tempo_jogado_horas:
+            jogo.tempo_jogado_horas = novo_tempo
+            alterado = True
+
+        capa = self._capa_steam(item)
+        if capa and capa != jogo.capa_url:
+            jogo.capa_url = capa
+            alterado = True
+
+        if self._conquistas_foram_sincronizadas(item):
+            total = self._inteiro_nao_negativo(
+                item, "total_conquistas", "O total de conquistas"
+            )
+            obtidas = self._inteiro_nao_negativo(
+                item, "conquistas_obtidas", "As conquistas obtidas"
+            )
+            if obtidas > total:
+                raise ErroDeValidacao(
+                    "As conquistas obtidas retornadas pela Steam ultrapassam o total."
+                )
+            if total != jogo.total_conquistas or obtidas != jogo.conquistas_obtidas:
+                jogo.total_conquistas = total
+                jogo.conquistas_obtidas = obtidas
+                alterado = True
+
+        return alterado
 
     def listar_runs(self):
         return (

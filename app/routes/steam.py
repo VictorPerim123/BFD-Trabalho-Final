@@ -24,10 +24,17 @@ def importar():
             servico_steam = SteamService(current_app.config.get("STEAM_API_KEY"))
             steamid = servico_steam.resolver_steamid(identificador)
             biblioteca = servico_steam.obter_biblioteca(steamid)
-            resultado = BacklogService(usuario_atual()).importar_jogos_steam(biblioteca)
+            usuario = usuario_atual()
+            usuario.steam_id = steamid
+            resultado = BacklogService(usuario).importar_jogos_steam(biblioteca)
         except SteamNaoConfigurado as exc:
             erro = str(exc)
         except (SteamErroDeComunicacao, SteamPerfilIndisponivel, ErroDeValidacao) as exc:
             erro = str(exc)
 
-    return render_template("steam_importar.html", erro=erro, resultado=resultado)
+    return render_template(
+        "steam_importar.html",
+        erro=erro,
+        resultado=resultado,
+        steam_id_salvo=getattr(usuario_atual(), "steam_id", "") or "",
+    )

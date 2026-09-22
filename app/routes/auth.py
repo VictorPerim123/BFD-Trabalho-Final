@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urlsplit
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 
@@ -30,6 +31,18 @@ def login():
             session[SESSION_KEY] = usuario.id
             session.permanent = True
             destino = request.args.get("proximo") or url_for("pages.raiz")
+            try:
+                partes = urlsplit(destino)
+            except ValueError:
+                destino = url_for("pages.raiz")
+            else:
+                if (
+                    partes.scheme
+                    or partes.netloc
+                    or not destino.startswith("/")
+                    or destino.startswith(("//", "/\\"))
+                ):
+                    destino = url_for("pages.raiz")
             return redirect(destino)
 
         erro = "Usuário/e-mail ou senha inválidos."
@@ -59,8 +72,8 @@ def registrar():
             erro = "O e-mail deve ter no máximo 160 caracteres."
         elif not EMAIL_RE.fullmatch(email):
             erro = "Informe um e-mail válido."
-        elif len(senha) < 6:
-            erro = "A senha deve ter ao menos 6 caracteres."
+        elif len(senha) < 8:
+            erro = "A senha deve ter ao menos 8 caracteres."
         elif Usuario.query.filter(
             (Usuario.username == username) | (Usuario.email == email)
         ).first():

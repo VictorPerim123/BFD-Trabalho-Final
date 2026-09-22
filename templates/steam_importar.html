@@ -12,7 +12,9 @@
       Isso <strong>não substitui</strong> o cadastro manual: adiciona jogos ainda
       ausentes e associa a Steam a um cadastro manual quando encontra o mesmo
       título, evitando duplicatas. O tempo jogado nunca é reduzido; status, nota
-      e categorias continuam sendo definidos por você.
+      e categorias continuam sendo definidos por você. A sincronização também
+      atualiza a capa, o tempo jogado e o progresso de conquistas quando esses
+      dados estiverem disponíveis na Steam.
     </p>
 
     {% if erro %}
@@ -21,7 +23,7 @@
 
     {% if resultado %}
     <p class="hint" role="status" style="margin-bottom: var(--space-4);">
-      {{ resultado.importados }} jogo(s) importado(s), {{ resultado.vinculados }} cadastro(s) manual(is) associado(s) à Steam e {{ resultado.ignorados }} já identificado(s) pelo AppID.
+      {{ resultado.importados }} jogo(s) importado(s), {{ resultado.vinculados }} cadastro(s) manual(is) associado(s), {{ resultado.atualizados }} jogo(s) sincronizado(s) e {{ resultado.ignorados }} sem alterações.
     </p>
     {% endif %}
 
@@ -30,6 +32,7 @@
       <div class="field">
         <label for="steam-id">SteamID64 ou vanity URL</label>
         <input type="text" id="steam-id" name="identificador" required
+               value="{{ steam_id_salvo }}"
                placeholder="Ex: 76561197960434622 ou steamcommunity.com/id/seunome" />
         <p class="hint">
           Seu perfil e biblioteca de jogos precisam estar públicos na Steam

@@ -33,6 +33,6 @@ def usuario(app):
 
 @pytest.fixture()
 def client_autenticado(client, usuario):
-    """Cliente de teste já com sessão de login ativa."""
+
     client.post("/login", data={"usuario": "jogadorteste", "senha": "SenhaForte123"})
     return client

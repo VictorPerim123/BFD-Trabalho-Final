@@ -70,10 +70,11 @@
     article.setAttribute("aria-label", game.titulo);
 
     article.innerHTML = `
-      <div class="game-card__cover" role="img" aria-label="Capa não disponível para ${SavePointUI.escapeHtml(game.titulo)}">
+      <div class="game-card__cover" role="img" aria-label="Capa de ${SavePointUI.escapeHtml(game.titulo)}">
         Sem capa
       </div>
       <h3 class="game-card__title">${SavePointUI.escapeHtml(game.titulo)}</h3>
+      <p class="game-card__playtime">${SavePointUI.formatHoras(game.tempo_jogado_horas)} jogadas${game.steam_appid ? " · Steam" : ""}</p>
       <div class="game-card__meta">
         <span class="badge ${SavePointUI.statusBadgeClass(game.status)}">${SavePointUI.statusLabel(game.status)}</span>
         ${game.nota != null ? `<span class="game-card__rating">★ ${game.nota}</span>` : ""}
@@ -93,6 +94,23 @@
         <button type="button" class="btn btn-danger-outline btn-sm" data-action="delete">Excluir</button>
       </div>
     `;
+
+    const cover = article.querySelector(".game-card__cover");
+    if (game.capa_url) {
+      const image = document.createElement("img");
+      image.src = game.capa_url;
+      image.alt = `Capa de ${game.titulo}`;
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      image.addEventListener("error", () => {
+        cover.textContent = "Sem capa";
+        cover.setAttribute("aria-label", `Capa não disponível para ${game.titulo}`);
+      });
+      cover.textContent = "";
+      cover.appendChild(image);
+    } else {
+      cover.setAttribute("aria-label", `Capa não disponível para ${game.titulo}`);
+    }
 
     article.querySelector('[data-action="edit"]').addEventListener("click", () => openForm(game));
     article.querySelector('[data-action="delete"]').addEventListener("click", () => handleDelete(game));

@@ -23,7 +23,7 @@
   min-width: 0;
 }
 
-/* ---------- Marca ---------- */
+
 .brand {
   display: flex;
   align-items: center;
@@ -44,7 +44,7 @@
 }
 .brand-accent { color: var(--accent-gold); }
 
-/* ---------- Navegação principal (sidebar no desktop) ---------- */
+
 .main-nav {
   display: flex;
   flex-direction: column;
@@ -91,7 +91,7 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-/* ---------- Barra superior de cada página ---------- */
+
 .page-topbar {
   display: flex;
   flex-wrap: wrap;
@@ -110,14 +110,14 @@
   flex-wrap: wrap;
 }
 
-/* ---------- Grid de cards do backlog ---------- */
+
 .games-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: var(--space-5);
 }
 
-/* ---------- Grid de estatísticas do dashboard ---------- */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -125,7 +125,7 @@
   margin-bottom: var(--space-6);
 }
 
-/* ---------- Grid de builds ---------- */
+
 .builds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -194,7 +194,7 @@
   }
 }
 
-/* ---------- Página centrada (login/registro), sem sidebar ---------- */
+
 .centered-page {
   min-height: 100vh;
   display: grid;

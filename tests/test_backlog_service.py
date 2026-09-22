@@ -118,7 +118,7 @@ def test_importacao_steam_associa_jogo_manual_sem_duplicar(app):
             [{"steam_appid": 1145360, "titulo": "HADES", "tempo_jogado_horas": 20}]
         )
 
-        assert resultado == {"importados": 0, "vinculados": 1, "ignorados": 0}
+        assert resultado == {"importados": 0, "vinculados": 1, "atualizados": 0, "ignorados": 0}
         assert Jogo.query.filter_by(usuario_id=usuario.id).count() == 1
         assert manual.steam_appid == 1145360
         assert manual.tempo_jogado_horas == 20
@@ -148,10 +148,80 @@ def test_importacao_steam_repetida_ignora_appid_ja_associado(app):
         primeira = servico.importar_jogos_steam(biblioteca)
         segunda = servico.importar_jogos_steam(biblioteca)
 
-        assert primeira == {"importados": 1, "vinculados": 0, "ignorados": 0}
-        assert segunda == {"importados": 0, "vinculados": 0, "ignorados": 1}
+        assert primeira == {"importados": 1, "vinculados": 0, "atualizados": 0, "ignorados": 0}
+        assert segunda == {"importados": 0, "vinculados": 0, "atualizados": 0, "ignorados": 1}
         assert Jogo.query.filter_by(usuario_id=usuario.id).count() == 1
 
+
+
+def test_importacao_steam_atualiza_capa_e_conquistas_de_appid_existente(app):
+    with app.app_context():
+        usuario = _criar_usuario()
+        servico = BacklogService(usuario)
+        jogo = servico.criar_jogo(
+            {
+                "titulo": "Hades",
+                "tempo_jogado_horas": 20,
+                "steam_appid": 1145360,
+                "total_conquistas": 10,
+                "conquistas_obtidas": 2,
+            }
+        )
+
+        resultado = servico.importar_jogos_steam(
+            [
+                {
+                    "steam_appid": 1145360,
+                    "titulo": "Hades",
+                    "tempo_jogado_horas": 25,
+                    "capa_url": "https://cdn.example/hades.jpg",
+                    "total_conquistas": 49,
+                    "conquistas_obtidas": 31,
+                    "conquistas_sincronizadas": True,
+                }
+            ]
+        )
+
+        assert resultado == {
+            "importados": 0,
+            "vinculados": 0,
+            "atualizados": 1,
+            "ignorados": 0,
+        }
+        assert jogo.tempo_jogado_horas == 25
+        assert jogo.capa_url == "https://cdn.example/hades.jpg"
+        assert jogo.total_conquistas == 49
+        assert jogo.conquistas_obtidas == 31
+
+
+def test_importacao_steam_nao_zera_conquistas_quando_api_falha(app):
+    with app.app_context():
+        usuario = _criar_usuario()
+        servico = BacklogService(usuario)
+        jogo = servico.criar_jogo(
+            {
+                "titulo": "Hades",
+                "steam_appid": 1145360,
+                "total_conquistas": 49,
+                "conquistas_obtidas": 31,
+            }
+        )
+
+        servico.importar_jogos_steam(
+            [
+                {
+                    "steam_appid": 1145360,
+                    "titulo": "Hades",
+                    "tempo_jogado_horas": 0,
+                    "total_conquistas": 0,
+                    "conquistas_obtidas": 0,
+                    "conquistas_sincronizadas": False,
+                }
+            ]
+        )
+
+        assert jogo.total_conquistas == 49
+        assert jogo.conquistas_obtidas == 31
 
 def test_importacao_steam_faz_rollback_se_item_posterior_for_invalido(app):
     from app.models import Jogo

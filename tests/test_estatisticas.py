@@ -50,7 +50,7 @@ def test_nota_media_ignora_jogos_sem_nota(app):
         servico = _servico()
         servico.criar_jogo({"titulo": "Jogo A", "nota": 8})
         servico.criar_jogo({"titulo": "Jogo B", "nota": 10})
-        servico.criar_jogo({"titulo": "Jogo C"})  # sem nota
+        servico.criar_jogo({"titulo": "Jogo C"})
 
         stats = servico.calcular_estatisticas_dashboard()
         assert stats["nota_media"] == 9.0

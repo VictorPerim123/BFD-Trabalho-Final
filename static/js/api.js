@@ -34,7 +34,7 @@ const SavePointAPI = (() => {
         const corpo = await res.json();
         if (corpo && corpo.erro) mensagem = corpo.erro;
       } catch {
-        /* resposta sem corpo JSON*/
+
       }
       throw new Error(mensagem);
     }

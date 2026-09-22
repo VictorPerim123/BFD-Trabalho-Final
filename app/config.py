@@ -1,4 +1,5 @@
 import os
+import secrets
 from datetime import timedelta
 
 from sqlalchemy.pool import StaticPool
@@ -7,7 +8,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "chave-de-desenvolvimento-troque-em-producao")
+    SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS jogo (
                              conquistas_obtidas >= 0 AND conquistas_obtidas <= total_conquistas
                          ),
     steam_appid          INTEGER,
+    capa_url             VARCHAR(500),
     criado_em            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -60,11 +61,3 @@ CREATE TABLE IF NOT EXISTS build_anotacao (
 );
 
 CREATE INDEX IF NOT EXISTS ix_build_anotacao_jogo_id ON build_anotacao (jogo_id);
-
-CREATE TABLE IF NOT EXISTS amizade (
-    usuario_solicitante_id  INTEGER NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
-    usuario_receptor_id     INTEGER NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
-    status_solicitacao      VARCHAR(10) NOT NULL DEFAULT 'pendente'
-                             CHECK (status_solicitacao IN ('pendente', 'aceita', 'recusada')),
-    PRIMARY KEY (usuario_solicitante_id, usuario_receptor_id)
-);

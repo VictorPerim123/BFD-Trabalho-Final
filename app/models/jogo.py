@@ -28,7 +28,8 @@ class Jogo(db.Model):
     total_conquistas = db.Column(db.Integer, nullable=False, default=0)
     conquistas_obtidas = db.Column(db.Integer, nullable=False, default=0)
 
-    steam_appid = db.Column(db.Integer, nullable=True)  # preenchido quando importado da Steam
+    steam_appid = db.Column(db.Integer, nullable=True)
+    capa_url = db.Column(db.String(500), nullable=True)
     criado_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     categorias = db.relationship(
@@ -55,6 +56,7 @@ class Jogo(db.Model):
             "percentual_conquistas": self.percentual_conquistas,
             "categorias": [c.nome for c in self.categorias],
             "steam_appid": self.steam_appid,
+            "capa_url": self.capa_url,
         }
 
     def __repr__(self):

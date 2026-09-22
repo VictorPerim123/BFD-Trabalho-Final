@@ -1,1 +1,0 @@
-# Testes para as regras de negócio

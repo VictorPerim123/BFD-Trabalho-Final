@@ -55,3 +55,43 @@ def test_logout_exibe_feedback_na_tela_de_login(client_autenticado):
 
     assert resposta.status_code == 200
     assert "Você saiu da sua conta." in resposta.get_data(as_text=True)
+
+
+def test_login_nao_redireciona_para_site_externo(client, usuario):
+    resposta = client.post(
+        "/login?proximo=https://exemplo-malicioso.invalid",
+        data={"usuario": "jogadorteste", "senha": "SenhaForte123"},
+        follow_redirects=False,
+    )
+
+    assert resposta.status_code == 302
+    assert resposta.headers["Location"].endswith("/")
+    assert "exemplo-malicioso.invalid" not in resposta.headers["Location"]
+
+def test_cadastro_rejeita_senha_curta(client, app):
+    resposta = client.post("/registrar", data=_dados_validos(senha="1234567"))
+
+    assert resposta.status_code == 200
+    assert "ao menos 8 caracteres" in resposta.get_data(as_text=True)
+    with app.app_context():
+        assert Usuario.query.count() == 0
+
+
+def test_login_nao_redireciona_com_barra_invertida(client, usuario):
+    resposta = client.post(
+        "/login?proximo=/%5C%5Cexemplo-malicioso.invalid",
+        data={"usuario": "jogadorteste", "senha": "SenhaForte123"},
+        follow_redirects=False,
+    )
+
+    assert resposta.status_code == 302
+    assert resposta.headers["Location"].endswith("/")
+    assert "exemplo-malicioso.invalid" not in resposta.headers["Location"]
+
+
+def test_respostas_incluem_cabecalhos_de_seguranca(client):
+    resposta = client.get("/login")
+
+    assert resposta.headers["X-Content-Type-Options"] == "nosniff"
+    assert resposta.headers["X-Frame-Options"] == "DENY"
+    assert resposta.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"

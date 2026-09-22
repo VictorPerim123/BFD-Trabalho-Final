@@ -13,7 +13,7 @@ class Usuario(db.Model):
     username = db.Column(db.String(60), unique=True, nullable=False, index=True)
     email = db.Column(db.String(160), unique=True, nullable=False, index=True)
     senha_hash = db.Column(db.String(255), nullable=False)
-    steam_id = db.Column(db.String(32), nullable=True)  # opcional, usado na importação Steam
+    steam_id = db.Column(db.String(32), nullable=True)
     criado_em = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     jogos = db.relationship("Jogo", backref="usuario", cascade="all, delete-orphan", lazy="dynamic")

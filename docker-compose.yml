@@ -24,13 +24,12 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://savepoint:savepoint@db:5432/savepoint
-      SECRET_KEY: troque-esta-chave-em-producao
-      FLASK_DEBUG: "1"
-      # STEAM_API_KEY:
+      SECRET_KEY: ${SECRET_KEY:-}
+      FLASK_DEBUG: ${FLASK_DEBUG:-0}
+      STEAM_API_KEY: ${STEAM_API_KEY:-}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-0}
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app
 
 volumes:
   savepoint_pgdata:

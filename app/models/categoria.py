@@ -1,6 +1,6 @@
 from app.extensions import db
 
-# Tabela associativa pura (sem colunas extras) para o relacionamento N:M
+
 jogo_categoria = db.Table(
     "jogo_categoria",
     db.Column("jogo_id", db.Integer, db.ForeignKey("jogo.id", ondelete="CASCADE"), primary_key=True),
