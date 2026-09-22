@@ -9,10 +9,10 @@
 
   <section class="card" style="max-width: 480px;">
     <p>
-      Isso <strong>não substitui</strong> o cadastro manual: adiciona ao seu
-      backlog os jogos da Steam que ainda não estão cadastrados e sincroniza
-      tempo jogado e contadores de conquistas. Status, nota, categorias, runs
-      e builds continuam sendo definidos por você.
+      Isso <strong>não substitui</strong> o cadastro manual: adiciona jogos ainda
+      ausentes e associa a Steam a um cadastro manual quando encontra o mesmo
+      título, evitando duplicatas. O tempo jogado nunca é reduzido; status, nota
+      e categorias continuam sendo definidos por você.
     </p>
 
     {% if erro %}
@@ -21,13 +21,7 @@
 
     {% if resultado %}
     <p class="hint" role="status" style="margin-bottom: var(--space-4);">
-      {{ resultado.importados }} jogo(s) novo(s) importado(s),
-      {{ resultado.atualizados }} jogo(s) sincronizado(s) e
-      conquistas atualizadas em {{ resultado.conquistas_sincronizadas }} jogo(s), de
-      {{ resultado.total }} encontrado(s) na Steam.
-      {% if resultado.conquistas_indisponiveis %}
-        Em {{ resultado.conquistas_indisponiveis }} jogo(s), as conquistas não estavam disponíveis.
-      {% endif %}
+      {{ resultado.importados }} jogo(s) importado(s), {{ resultado.vinculados }} cadastro(s) manual(is) associado(s) à Steam e {{ resultado.ignorados }} já identificado(s) pelo AppID.
     </p>
     {% endif %}
 

@@ -1,3 +1,6 @@
+{# Casca das páginas SEM sidebar: login, cadastro e páginas de erro.
+   Existe para que o <head> (fontes + 3 CSS) fique em um lugar só —
+   antes ele estava duplicado em quatro arquivos. #}
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,6 +21,13 @@
   <a class="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
 
   <main class="centered-page" id="conteudo-principal">
+    {% with mensagens = get_flashed_messages() %}
+      {% if mensagens %}
+      <div class="empty-state" role="status" style="margin-bottom: var(--space-5);">
+        {% for mensagem in mensagens %}<p style="margin:0;">{{ mensagem }}</p>{% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </main>
 </body>

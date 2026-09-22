@@ -1,6 +1,4 @@
-"""
-routes/auth.py — cadastro, login e logout (sessão + senha com hash).
-"""
+import re
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 
@@ -9,6 +7,8 @@ from app.models import Usuario
 from app.utils.auth import usuario_atual, SESSION_KEY
 
 auth_bp = Blueprint("auth", __name__)
+
+EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -51,6 +51,14 @@ def registrar():
 
         if not nome or not username or not email or not senha:
             erro = "Preencha todos os campos."
+        elif len(nome) > 120:
+            erro = "O nome deve ter no máximo 120 caracteres."
+        elif len(username) > 60:
+            erro = "O usuário deve ter no máximo 60 caracteres."
+        elif len(email) > 160:
+            erro = "O e-mail deve ter no máximo 160 caracteres."
+        elif not EMAIL_RE.fullmatch(email):
+            erro = "Informe um e-mail válido."
         elif len(senha) < 6:
             erro = "A senha deve ter ao menos 6 caracteres."
         elif Usuario.query.filter(

@@ -10,6 +10,27 @@ services:
       - "5432:5432"
     volumes:
       - savepoint_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U savepoint"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://savepoint:savepoint@db:5432/savepoint
+      SECRET_KEY: troque-esta-chave-em-producao
+      FLASK_DEBUG: "1"
+      # STEAM_API_KEY:
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
 
 volumes:
   savepoint_pgdata:

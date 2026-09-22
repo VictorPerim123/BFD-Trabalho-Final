@@ -23,26 +23,19 @@
       populateJogoFilter(games);
       renderRuns();
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar o histórico de runs.", {
-        isError: true,
-      });
+      SavePointUI.showToast("Não foi possível carregar o histórico de runs.", { isError: true });
       console.error(err);
     }
   }
 
   function populateJogoFilter(games) {
-    const comRuns = games.filter((game) =>
-      allRuns.some((run) => run.jogo_id === game.id),
-    );
+    const comRuns = games.filter((game) => allRuns.some((run) => run.jogo_id === game.id));
     const atual = jogoFilter.value;
 
     jogoFilter.innerHTML =
       '<option value="">Jogo: todos</option>' +
       comRuns
-        .map(
-          (game) =>
-            `<option value="${game.id}">${SavePointUI.escapeHtml(game.titulo)}</option>`,
-        )
+        .map((game) => `<option value="${game.id}">${SavePointUI.escapeHtml(game.titulo)}</option>`)
         .join("");
     jogoFilter.value = atual;
   }
@@ -82,10 +75,7 @@
 
     const article = document.createElement("article");
     article.className = "card";
-    article.setAttribute(
-      "aria-label",
-      `Run de ${titulo} em ${formatarData(run.data)}`,
-    );
+    article.setAttribute("aria-label", `Run de ${titulo} em ${formatarData(run.data)}`);
 
     article.innerHTML = `
       <div class="game-card__meta">
@@ -106,20 +96,17 @@
           : ""
       }
       <div class="game-card__actions">
+        <a class="btn btn-ghost btn-sm" href="/runs/novo?run_id=${run.id}">Editar</a>
         <button type="button" class="btn btn-danger-outline btn-sm" data-action="delete">Excluir run</button>
       </div>
     `;
 
-    article
-      .querySelector('[data-action="delete"]')
-      .addEventListener("click", () => handleDelete(run, titulo));
+    article.querySelector('[data-action="delete"]').addEventListener("click", () => handleDelete(run, titulo));
     return article;
   }
 
   async function handleDelete(run, titulo) {
-    const confirmado = window.confirm(
-      `Excluir a run de "${titulo}" de ${formatarData(run.data)}?`,
-    );
+    const confirmado = window.confirm(`Excluir a run de "${titulo}" de ${formatarData(run.data)}?`);
     if (!confirmado) return;
 
     try {
@@ -127,9 +114,7 @@
       SavePointUI.showToast("Run excluída.");
       await loadRuns();
     } catch (err) {
-      SavePointUI.showToast(err.message || "Não foi possível excluir a run.", {
-        isError: true,
-      });
+      SavePointUI.showToast(err.message || "Não foi possível excluir a run.", { isError: true });
     }
   }
 

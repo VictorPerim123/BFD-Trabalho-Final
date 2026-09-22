@@ -23,16 +23,17 @@ CREATE TABLE IF NOT EXISTS jogo (
     status               VARCHAR(20) NOT NULL DEFAULT 'quero_jogar'
                          CHECK (status IN ('quero_jogar', 'jogando', 'zerado', 'platinado', 'abandonado')),
     nota                 REAL CHECK (nota IS NULL OR (nota >= 0 AND nota <= 10)),
-    tempo_jogado_horas   INTEGER NOT NULL DEFAULT 0,
-    total_conquistas     INTEGER NOT NULL DEFAULT 0,
-    conquistas_obtidas   INTEGER NOT NULL DEFAULT 0,
+    tempo_jogado_horas   INTEGER NOT NULL DEFAULT 0 CHECK (tempo_jogado_horas >= 0),
+    total_conquistas     INTEGER NOT NULL DEFAULT 0 CHECK (total_conquistas >= 0),
+    conquistas_obtidas   INTEGER NOT NULL DEFAULT 0 CHECK (
+                             conquistas_obtidas >= 0 AND conquistas_obtidas <= total_conquistas
+                         ),
     steam_appid          INTEGER,
     criado_em            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS ix_jogo_usuario_id ON jogo (usuario_id);
 
--- Relacao N:M entre Jogo e Categoria
 CREATE TABLE IF NOT EXISTS jogo_categoria (
     jogo_id       INTEGER NOT NULL REFERENCES jogo(id) ON DELETE CASCADE,
     categoria_id  INTEGER NOT NULL REFERENCES categoria(id) ON DELETE CASCADE,
@@ -43,7 +44,7 @@ CREATE TABLE IF NOT EXISTS run_diario (
     id                 SERIAL PRIMARY KEY,
     jogo_id            INTEGER NOT NULL REFERENCES jogo(id) ON DELETE CASCADE,
     data               DATE NOT NULL,
-    duracao_segundos   INTEGER NOT NULL DEFAULT 0,
+    duracao_segundos   INTEGER NOT NULL DEFAULT 1 CHECK (duracao_segundos > 0),
     resultado          VARCHAR(10) NOT NULL CHECK (resultado IN ('vitoria', 'derrota')),
     causa_morte        VARCHAR(200)
 );

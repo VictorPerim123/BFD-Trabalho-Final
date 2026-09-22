@@ -4,7 +4,7 @@
 
 {% block content %}
   <header class="page-topbar">
-    <h1>Registrar Nova Run</h1>
+    <h1 id="run-page-title">Registrar Nova Run</h1>
   </header>
 
   <form id="run-form" class="card" style="max-width: 420px;" novalidate>
@@ -18,13 +18,14 @@
 
     <div class="field">
       <label for="run-data">Data da run</label>
-      <input type="date" id="run-data" name="data" required />
+      <input type="date" id="run-data" name="data" required aria-describedby="erro-data" />
+      <p class="error-message" id="erro-data" role="alert"></p>
     </div>
 
     <div class="field">
       <label for="run-tempo">Tempo de duração</label>
-      <input type="time" id="run-tempo" name="tempo" step="1" required aria-describedby="erro-tempo" />
-      <p class="hint">Formato hh:mm:ss.</p>
+      <input type="text" id="run-tempo" name="tempo" inputmode="numeric" maxlength="12" placeholder="00:25:30" required aria-describedby="dica-tempo erro-tempo" />
+      <p class="hint" id="dica-tempo">Formato HH:MM:SS ou MM:SS; horas podem ultrapassar 24.</p>
       <p class="error-message" id="erro-tempo" role="alert"></p>
     </div>
 
@@ -43,10 +44,10 @@
 
     <div class="field" id="causa-morte-wrapper" hidden>
       <label for="run-causa-morte">Observações / causa da morte</label>
-      <textarea id="run-causa-morte" name="causa_morte" placeholder="Ex: Delirium na Cave"></textarea>
+      <textarea id="run-causa-morte" name="causa_morte" maxlength="200" placeholder="Ex: Delirium na Cave"></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-block">Salvar Run</button>
+    <button type="submit" class="btn btn-primary btn-block" id="run-submit">Salvar Run</button>
   </form>
 {% endblock %}
 

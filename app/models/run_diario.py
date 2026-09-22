@@ -9,13 +9,14 @@ class RunDiario(db.Model):
     __tablename__ = "run_diario"
     __table_args__ = (
         db.CheckConstraint(f"resultado IN {RESULTADOS_VALIDOS}", name="ck_run_resultado_valido"),
+        db.CheckConstraint("duracao_segundos > 0", name="ck_run_duracao_positiva"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
     jogo_id = db.Column(db.Integer, db.ForeignKey("jogo.id", ondelete="CASCADE"), nullable=False, index=True)
 
     data = db.Column(db.Date, nullable=False, default=date_cls.today)
-    duracao_segundos = db.Column(db.Integer, nullable=False, default=0)
+    duracao_segundos = db.Column(db.Integer, nullable=False, default=1)
     resultado = db.Column(db.String(10), nullable=False)
     causa_morte = db.Column(db.String(200), nullable=True)
 
@@ -27,12 +28,27 @@ class RunDiario(db.Model):
 
     @staticmethod
     def segundos_a_partir_de_hhmmss(texto):
-        """Converte 'HH:MM:SS' (ou 'MM:SS') vindo do <input type=time> em segundos."""
-        partes = [int(p) for p in texto.split(":")]
-        while len(partes) < 3:
-            partes.insert(0, 0)
-        h, m, s = partes[-3:]
-        return h * 3600 + m * 60 + s
+        if not isinstance(texto, str):
+            raise ValueError("tempo deve ser texto")
+
+        partes_texto = texto.strip().split(":")
+        if len(partes_texto) not in (2, 3) or any(not p.isdigit() for p in partes_texto):
+            raise ValueError("formato de tempo inválido")
+
+        partes = [int(p) for p in partes_texto]
+        if len(partes) == 2:
+            h = 0
+            m, s = partes
+        else:
+            h, m, s = partes
+
+        if h < 0 or not (0 <= m <= 59) or not (0 <= s <= 59):
+            raise ValueError("tempo fora do intervalo válido")
+
+        total = h * 3600 + m * 60 + s
+        if total <= 0:
+            raise ValueError("a duração deve ser maior que zero")
+        return total
 
     def to_dict(self):
         return {

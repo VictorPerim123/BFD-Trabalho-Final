@@ -1,7 +1,3 @@
-"""
-Jogo — item do backlog de um usuário. Núcleo do domínio do SavePoint.
-"""
-
 from datetime import datetime, timezone
 
 from app.extensions import db
@@ -15,6 +11,10 @@ class Jogo(db.Model):
     __table_args__ = (
         db.CheckConstraint(f"status IN {STATUS_VALIDOS}", name="ck_jogo_status_valido"),
         db.CheckConstraint("nota IS NULL OR (nota >= 0 AND nota <= 10)", name="ck_jogo_nota_intervalo"),
+        db.CheckConstraint("tempo_jogado_horas >= 0", name="ck_jogo_tempo_nao_negativo"),
+        db.CheckConstraint("total_conquistas >= 0", name="ck_jogo_total_conquistas_nao_negativo"),
+        db.CheckConstraint("conquistas_obtidas >= 0", name="ck_jogo_conquistas_obtidas_nao_negativo"),
+        db.CheckConstraint("conquistas_obtidas <= total_conquistas", name="ck_jogo_conquistas_consistentes"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
@@ -38,18 +38,7 @@ class Jogo(db.Model):
     builds = db.relationship("BuildAnotacao", backref="jogo", cascade="all, delete-orphan", lazy="dynamic")
 
     @property
-    def capa_url(self):
-        """URL da capa vertical da biblioteca Steam quando o jogo possui AppID."""
-        if self.steam_appid is None:
-            return None
-        return (
-            "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/"
-            f"{self.steam_appid}/library_600x900_2x.jpg"
-        )
-
-    @property
     def percentual_conquistas(self):
-        """Percentual de conquistas obtidas (0 quando o jogo não rastreia conquistas)."""
         if not self.total_conquistas:
             return 0
         return round((self.conquistas_obtidas / self.total_conquistas) * 100)
@@ -66,7 +55,6 @@ class Jogo(db.Model):
             "percentual_conquistas": self.percentual_conquistas,
             "categorias": [c.nome for c in self.categorias],
             "steam_appid": self.steam_appid,
-            "capa_url": self.capa_url,
         }
 
     def __repr__(self):

@@ -1,9 +1,3 @@
-"""
-tests/test_api_jogos.py — teste de integração: a rota /api/jogos exige
-login e, autenticado, cobre o fluxo completo de criação e listagem.
-"""
-
-
 def test_api_jogos_sem_login_retorna_401(client):
     resposta = client.get("/api/jogos")
     assert resposta.status_code == 401
@@ -32,7 +26,6 @@ def test_criar_jogo_sem_titulo_retorna_400(client_autenticado):
 
 
 def test_excluir_jogo_de_outro_usuario_retorna_404(client_autenticado, app):
-    """Um usuário não pode excluir jogo de outro (escopo aplicado no service)."""
     from app.extensions import db
     from app.models import Usuario, Jogo
 
@@ -51,21 +44,18 @@ def test_excluir_jogo_de_outro_usuario_retorna_404(client_autenticado, app):
     assert resposta.status_code == 404
 
 
-def test_jogo_steam_expoe_url_de_capa(client_autenticado):
+def test_api_rejeita_numero_invalido_sem_erro_500(client_autenticado):
     resposta = client_autenticado.post(
         "/api/jogos",
-        json={
-            "titulo": "Hades",
-            "status": "jogando",
-            "steam_appid": 1145360,
-            "tempo_jogado_horas": 42,
-        },
+        json={"titulo": "Jogo inválido", "tempo_jogado_horas": "abc"},
     )
+    assert resposta.status_code == 400
+    assert "erro" in resposta.get_json()
 
-    assert resposta.status_code == 201
-    jogo = resposta.get_json()
-    assert jogo["tempo_jogado_horas"] == 42
-    assert jogo["capa_url"] == (
-        "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/"
-        "1145360/library_600x900_2x.jpg"
+
+def test_api_rejeita_conquistas_acima_do_total(client_autenticado):
+    resposta = client_autenticado.post(
+        "/api/jogos",
+        json={"titulo": "Jogo inválido", "total_conquistas": 10, "conquistas_obtidas": 12},
     )
+    assert resposta.status_code == 400

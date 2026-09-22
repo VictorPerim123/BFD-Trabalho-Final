@@ -19,28 +19,18 @@
       populateCategoryFilter(allGames);
       renderGames();
     } catch (err) {
-      SavePointUI.showToast("Não foi possível carregar o backlog agora.", {
-        isError: true,
-      });
+      SavePointUI.showToast("Não foi possível carregar o backlog agora.", { isError: true });
       console.error(err);
     }
   }
 
   function populateCategoryFilter(games) {
     const categorias = new Set();
-    games.forEach((g) =>
-      (g.categorias || []).forEach((c) => categorias.add(c)),
-    );
+    games.forEach((g) => (g.categorias || []).forEach((c) => categorias.add(c)));
     const current = categoryFilter.value;
     categoryFilter.innerHTML =
       '<option value="">Categoria: todas</option>' +
-      [...categorias]
-        .sort()
-        .map(
-          (c) =>
-            `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`,
-        )
-        .join("");
+      [...categorias].sort().map((c) => `<option value="${SavePointUI.escapeHtml(c)}">${SavePointUI.escapeHtml(c)}</option>`).join("");
     categoryFilter.value = current;
   }
 
@@ -52,8 +42,7 @@
     return allGames.filter((g) => {
       const matchesTerm = !term || g.titulo.toLowerCase().includes(term);
       const matchesStatus = !status || g.status === status;
-      const matchesCategoria =
-        !categoria || (g.categorias || []).includes(categoria);
+      const matchesCategoria = !categoria || (g.categorias || []).includes(categoria);
       return matchesTerm && matchesStatus && matchesCategoria;
     });
   }
@@ -105,12 +94,8 @@
       </div>
     `;
 
-    article
-      .querySelector('[data-action="edit"]')
-      .addEventListener("click", () => openForm(game));
-    article
-      .querySelector('[data-action="delete"]')
-      .addEventListener("click", () => handleDelete(game));
+    article.querySelector('[data-action="edit"]').addEventListener("click", () => openForm(game));
+    article.querySelector('[data-action="delete"]').addEventListener("click", () => handleDelete(game));
 
     return article;
   }
@@ -163,37 +148,29 @@
     };
 
     if (payload.conquistas_obtidas > payload.total_conquistas) {
-      SavePointUI.showToast("Conquistas obtidas não podem passar do total.", {
-        isError: true,
-      });
+      SavePointUI.showToast("Conquistas obtidas não podem passar do total.", { isError: true });
       return;
     }
 
     try {
       await SavePointAPI.saveGame(payload);
-      SavePointUI.showToast(
-        editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.",
-      );
+      SavePointUI.showToast(editingId ? "Jogo atualizado." : "Jogo adicionado ao backlog.");
       closeForm();
       await loadGames();
     } catch (err) {
-      SavePointUI.showToast(err.message || "Não foi possível salvar o jogo.", {
-        isError: true,
-      });
+      SavePointUI.showToast(err.message || "Não foi possível salvar o jogo.", { isError: true });
     }
   }
 
   async function handleDelete(game) {
-    const confirmed = window.confirm(`Remover "${game.titulo}" do backlog?`);
+    const confirmed = window.confirm(`Excluir "${game.titulo}"? As runs e builds associadas a este jogo também serão excluídas.`);
     if (!confirmed) return;
     try {
       await SavePointAPI.deleteGame(game.id);
       SavePointUI.showToast("Jogo removido.");
       await loadGames();
     } catch (err) {
-      SavePointUI.showToast(err.message || "Não foi possível remover o jogo.", {
-        isError: true,
-      });
+      SavePointUI.showToast(err.message || "Não foi possível remover o jogo.", { isError: true });
     }
   }
 

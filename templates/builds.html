@@ -21,7 +21,7 @@
       </div>
       <div class="field">
         <label for="build-nome">Nome da build</label>
-        <input type="text" id="build-nome" name="nome_build" required placeholder="Ex: Mago Elemental" />
+        <input type="text" id="build-nome" name="nome_build" maxlength="120" required placeholder="Ex: Mago Elemental" />
       </div>
       <div class="field">
         <label for="build-equipamento">Equipamento</label>
@@ -32,7 +32,7 @@
         <textarea id="build-habilidades" name="habilidades" placeholder="Distribuição de skills e talentos"></textarea>
       </div>
       <div class="topbar-actions">
-        <button type="submit" class="btn btn-primary">Salvar</button>
+        <button type="submit" class="btn btn-primary" id="build-submit">Salvar</button>
         <button type="button" class="btn btn-ghost" id="btn-cancel-build-form">Cancelar</button>
       </div>
     </form>

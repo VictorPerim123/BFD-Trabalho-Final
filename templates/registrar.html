@@ -19,15 +19,15 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <div class="field">
           <label for="nome">Nome</label>
-          <input type="text" id="nome" name="nome" required />
+          <input type="text" id="nome" name="nome" maxlength="120" value="{{ request.form.get('nome', '') }}" required />
         </div>
         <div class="field">
           <label for="username">Usuário</label>
-          <input type="text" id="username" name="username" autocomplete="username" required />
+          <input type="text" id="username" name="username" maxlength="60" value="{{ request.form.get('username', '') }}" autocomplete="username" required />
         </div>
         <div class="field">
           <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" autocomplete="email" required />
+          <input type="email" id="email" name="email" maxlength="160" value="{{ request.form.get('email', '') }}" autocomplete="email" required />
         </div>
         <div class="field">
           <label for="senha">Senha</label>

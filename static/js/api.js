@@ -34,7 +34,7 @@ const SavePointAPI = (() => {
         const corpo = await res.json();
         if (corpo && corpo.erro) mensagem = corpo.erro;
       } catch {
-        /* resposta sem corpo JSON */
+        /* resposta sem corpo JSON*/
       }
       throw new Error(mensagem);
     }
@@ -42,8 +42,6 @@ const SavePointAPI = (() => {
     if (res.status === 204) return null;
     return res.json();
   }
-
-  /* ---------------------- Jogos / Backlog ---------------------- */
 
   function getGames() {
     return requisitar(ENDPOINTS.games);
@@ -66,13 +64,21 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.games}/${id}`, { method: "DELETE" });
   }
 
-  /* ---------------------- Runs (roguelike) ---------------------- */
-
   function getRuns() {
     return requisitar(ENDPOINTS.runs);
   }
 
+  function getRun(id) {
+    return requisitar(`${ENDPOINTS.runs}/${id}`);
+  }
+
   function saveRun(run) {
+    if (run.id) {
+      return requisitar(`${ENDPOINTS.runs}/${run.id}`, {
+        method: "PUT",
+        body: JSON.stringify(run),
+      });
+    }
     return requisitar(ENDPOINTS.runs, {
       method: "POST",
       body: JSON.stringify(run),
@@ -83,13 +89,21 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.runs}/${id}`, { method: "DELETE" });
   }
 
-  /* ---------------------- Builds ---------------------- */
-
   function getBuilds() {
     return requisitar(ENDPOINTS.builds);
   }
 
+  function getBuild(id) {
+    return requisitar(`${ENDPOINTS.builds}/${id}`);
+  }
+
   function saveBuild(build) {
+    if (build.id) {
+      return requisitar(`${ENDPOINTS.builds}/${build.id}`, {
+        method: "PUT",
+        body: JSON.stringify(build),
+      });
+    }
     return requisitar(ENDPOINTS.builds, {
       method: "POST",
       body: JSON.stringify(build),
@@ -100,8 +114,6 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.builds}/${id}`, { method: "DELETE" });
   }
 
-  /* ---------------------- Estatísticas (dashboard) ---------------------- */
-
   function getEstatisticas() {
     return requisitar(ENDPOINTS.estatisticas);
   }
@@ -111,9 +123,11 @@ const SavePointAPI = (() => {
     saveGame,
     deleteGame,
     getRuns,
+    getRun,
     saveRun,
     deleteRun,
     getBuilds,
+    getBuild,
     saveBuild,
     deleteBuild,
     getEstatisticas,
