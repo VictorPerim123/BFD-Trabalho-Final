@@ -116,11 +116,15 @@ class SteamService:
     def _normalizar_jogo(jogo, recentes=None):
         appid = jogo["appid"]
         minutos = max(0, int(jogo.get("playtime_forever", 0) or 0))
+        
+        status_calculado = "jogando" if minutos > 0 else "quero_jogar"
+
         return {
             "steam_appid": appid,
             "titulo": jogo.get("name", f"Jogo Steam #{appid}"),
             "tempo_jogado_horas": (minutos + 30) // 60,
             "tempo_jogado_minutos": minutos,
+            "status": status_calculado,  
             "atividade_recente": appid in recentes if recentes is not None else False,
             "atividade_recente_disponivel": recentes is not None,
         }
