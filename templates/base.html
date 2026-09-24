@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SavePoint — {% block title %}{% endblock %}</title>
-  <meta name="description" content="{% block description %}Organizador de backlog de jogos e runs de roguelike.{% endblock %}" />
+  <meta name="description" content="{% block description %}Backlog inteligente para acompanhar jogos, conquistas, builds, desafios e evolução do jogador.{% endblock %}" />
   <meta name="csrf-token" content="{{ csrf_token() }}" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,7 +40,10 @@
 
       <div class="sidebar-footer">
         {% if usuario_logado %}
-        <p class="hint" style="margin-bottom: var(--space-2);">{{ usuario_logado.nome }}</p>
+        <a class="sidebar-profile" href="{{ url_for('auth.perfil') }}" {% if request.endpoint == 'auth.perfil' %}aria-current="page"{% endif %}>
+          <span class="sidebar-profile__name">{{ usuario_logado.nome }}</span>
+          <span class="sidebar-profile__username">@{{ usuario_logado.username }} · Editar perfil</span>
+        </a>
         <form action="{{ url_for('auth.logout') }}" method="post">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <button type="submit" class="btn btn-ghost btn-sm btn-block">
@@ -69,6 +72,22 @@
 
   <div id="toast-region" aria-live="polite" aria-atomic="true"></div>
 
+  <dialog class="app-modal app-modal--wide" id="steam-import-modal" aria-labelledby="steam-import-modal-title">
+    <div class="app-modal__surface">
+      <div class="section-heading-row">
+        <div>
+          <span class="dashboard-eyebrow">Integração</span>
+          <h2 id="steam-import-modal-title">Importar da Steam</h2>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-close-steam-modal">Fechar</button>
+      </div>
+      <div id="steam-modal-content" data-steam-url="{{ url_for('steam.importar', modal=1) }}">
+        <div class="steam-modal-loading" role="status">Carregando importação Steam…</div>
+      </div>
+    </div>
+  </dialog>
+
   {% block scripts %}{% endblock %}
+  <script src="{{ url_for('static', filename='js/steam-import.js') }}"></script>
 </body>
 </html>

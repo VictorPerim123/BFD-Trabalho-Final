@@ -4,69 +4,126 @@
 
 {% block content %}
   <header class="page-topbar">
-    <h1>Meu Backlog</h1>
+    <div>
+      <h1>Meu Backlog</h1>
+      <p class="hint" id="backlog-summary">Carregando biblioteca...</p>
+    </div>
     <div class="topbar-actions">
       <a class="btn btn-ghost" href="{{ url_for('export.exportar_backlog') }}">Exportar HTML</a>
-      <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}">Importar da Steam</a>
+      <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}" data-steam-modal-trigger>Importar da Steam</a>
       <button type="button" class="btn btn-primary" id="btn-add-game">+ Adicionar jogo</button>
     </div>
   </header>
 
-  <form class="filters-bar" id="filters-form" role="search" aria-label="Filtrar backlog">
-    <label for="search-input" class="visually-hidden">Buscar jogo pelo título</label>
-    <input type="search" id="search-input" placeholder="Buscar jogo…" />
+  <form class="filters-panel" id="filters-form" role="search" aria-label="Filtrar backlog">
+    <div class="filters-bar">
+      <label for="search-input" class="visually-hidden">Buscar jogo pelo título</label>
+      <input type="search" id="search-input" placeholder="Buscar jogo…" autocomplete="off" />
 
-    <label for="status-filter" class="visually-hidden">Filtrar por status</label>
-    <select id="status-filter">
-      <option value="">Status: todos</option>
-      <option value="quero_jogar">Quero Jogar</option>
-      <option value="jogando">Jogando</option>
-      <option value="zerado">Zerado</option>
-      <option value="platinado">Platinado</option>
-      <option value="abandonado">Abandonado</option>
-    </select>
+      <label for="status-filter" class="visually-hidden">Filtrar por status</label>
+      <select id="status-filter">
+        <option value="">Status: todos</option>
+        <option value="quero_jogar">Quero Jogar</option>
+        <option value="jogando">Jogando</option>
+        <option value="jogado">Jogado</option>
+        <option value="zerado">Zerado</option>
+        <option value="platinado">Platinado</option>
+        <option value="abandonado">Abandonado</option>
+      </select>
 
-    <label for="category-filter" class="visually-hidden">Filtrar por categoria</label>
-    <select id="category-filter">
-      <option value="">Categoria: todas</option>
-    </select>
+      <label for="category-filter" class="visually-hidden">Filtrar por categoria</label>
+      <select id="category-filter">
+        <option value="">Categoria: todas</option>
+      </select>
+
+      <label for="priority-filter" class="visually-hidden">Filtrar por prioridade</label>
+      <select id="priority-filter">
+        <option value="">Prioridade: todas</option>
+        <option value="alta">Alta</option>
+        <option value="normal">Normal</option>
+        <option value="baixa">Baixa</option>
+      </select>
+
+      <label for="origin-filter" class="visually-hidden">Filtrar por origem</label>
+      <select id="origin-filter">
+        <option value="">Origem: todas</option>
+        <option value="steam">Steam</option>
+        <option value="manual">Manual</option>
+      </select>
+
+      <label for="sort-filter" class="visually-hidden">Ordenar backlog</label>
+      <select id="sort-filter">
+        <option value="titulo_asc">A–Z</option>
+        <option value="titulo_desc">Z–A</option>
+        <option value="prioridade">Prioridade</option>
+        <option value="tempo_desc">Mais jogados</option>
+        <option value="tempo_asc">Menos jogados</option>
+        <option value="nota_desc">Maior nota</option>
+        <option value="progresso_desc">Mais conquistas</option>
+        <option value="recentes">Adicionados recentemente</option>
+      </select>
+    </div>
+    <div class="filter-toggles">
+      <label><input type="checkbox" id="favorite-filter" /> Somente favoritos</label>
+      <label><input type="checkbox" id="achievements-filter" /> Somente com conquistas</label>
+      <button type="button" class="btn btn-ghost btn-sm" id="btn-clear-filters">Limpar filtros</button>
+    </div>
   </form>
 
-  <section class="card" id="game-form-card" hidden aria-labelledby="game-form-title" style="margin-bottom: var(--space-6);">
-    <h2 id="game-form-title">Adicionar jogo</h2>
-    <form id="game-form">
+  <dialog class="app-modal app-modal--wide" id="game-form-card" aria-labelledby="game-form-title">
+    <div class="app-modal__surface">
+      <div class="section-heading-row">
+        <h2 id="game-form-title">Adicionar jogo</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-close-game-form">Fechar</button>
+      </div>
+      <form id="game-form">
       <div class="field">
         <label for="game-titulo">Título do jogo</label>
         <input type="text" id="game-titulo" name="titulo" maxlength="160" required />
       </div>
 
-      <div class="field" style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
-        <div>
+      <div class="form-grid form-grid--2">
+        <div class="field">
           <label for="game-status">Status</label>
           <select id="game-status" name="status">
             <option value="quero_jogar">Quero Jogar</option>
             <option value="jogando">Jogando</option>
+            <option value="jogado">Jogado</option>
             <option value="zerado">Zerado</option>
             <option value="platinado">Platinado</option>
             <option value="abandonado">Abandonado</option>
           </select>
         </div>
-        <div>
-          <label for="game-nota">Nota pessoal (0–10)</label>
-          <input type="number" id="game-nota" name="nota" min="0" max="10" step="0.1" />
+        <div class="field">
+          <label for="game-prioridade">Prioridade</label>
+          <select id="game-prioridade" name="prioridade">
+            <option value="baixa">Baixa</option>
+            <option value="normal" selected>Normal</option>
+            <option value="alta">Alta</option>
+          </select>
         </div>
       </div>
 
-      <div class="field" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4);">
-        <div>
+      <div class="form-grid form-grid--2">
+        <div class="field">
+          <label for="game-nota">Nota pessoal (0–10)</label>
+          <input type="number" id="game-nota" name="nota" min="0" max="10" step="0.1" />
+        </div>
+        <div class="field checkbox-field">
+          <label for="game-favorito"><input type="checkbox" id="game-favorito" name="favorito" /> Favorito</label>
+        </div>
+      </div>
+
+      <div class="form-grid form-grid--3">
+        <div class="field">
           <label for="game-horas">Tempo jogado (h)</label>
           <input type="number" id="game-horas" name="tempo_jogado_horas" min="0" step="1" />
         </div>
-        <div>
+        <div class="field">
           <label for="game-conquistas-total">Total de conquistas</label>
           <input type="number" id="game-conquistas-total" name="total_conquistas" min="0" step="1" />
         </div>
-        <div>
+        <div class="field">
           <label for="game-conquistas-obtidas">Conquistas obtidas</label>
           <input type="number" id="game-conquistas-obtidas" name="conquistas_obtidas" min="0" step="1" />
         </div>
@@ -78,19 +135,19 @@
         <p class="hint">Separe múltiplas categorias por vírgula.</p>
       </div>
 
-      <div class="topbar-actions">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <button type="button" class="btn btn-ghost" id="btn-cancel-form">Cancelar</button>
-      </div>
-    </form>
-  </section>
+        <div class="app-modal__actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-form">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <section aria-labelledby="titulo-grid">
     <h2 id="titulo-grid" class="visually-hidden">Lista de jogos do backlog</h2>
     <div class="games-grid" id="games-grid"></div>
-    <p class="empty-state" id="empty-state" hidden>
-      Nenhum jogo encontrado com os filtros atuais.
-    </p>
+    <p class="empty-state" id="empty-state" hidden>Nenhum jogo encontrado com os filtros atuais.</p>
+    <nav class="pagination" id="pagination" aria-label="Paginação do backlog" hidden></nav>
   </section>
 {% endblock %}
 

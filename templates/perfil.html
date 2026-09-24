@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Meu perfil{% endblock %}
+
+{% block content %}
+  <header class="page-topbar">
+    <div>
+      <h1>Meu perfil</h1>
+      <p class="hint">Atualize seus dados de acesso e a identificação usada na integração Steam.</p>
+    </div>
+  </header>
+
+  <div class="profile-layout">
+    <section class="card" aria-labelledby="perfil-dados-titulo">
+      <div class="section-heading-row">
+        <div>
+          <h2 id="perfil-dados-titulo">Informações da conta</h2>
+          <p class="hint">Esses dados identificam você dentro do SavePoint.</p>
+        </div>
+      </div>
+
+      {% if erro_dados %}
+      <p class="error-message" role="alert" style="margin-bottom: var(--space-4);">{{ erro_dados }}</p>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="acao" value="dados" />
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label for="perfil-nome">Nome</label>
+            <input type="text" id="perfil-nome" name="nome" maxlength="120" required value="{{ dados.nome }}" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="perfil-username">Usuário</label>
+            <input type="text" id="perfil-username" name="username" maxlength="60" required value="{{ dados.username }}" autocomplete="username" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="perfil-email">E-mail</label>
+          <input type="email" id="perfil-email" name="email" maxlength="160" required value="{{ dados.email }}" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="perfil-steam">SteamID64 ou vanity</label>
+          <input type="text" id="perfil-steam" name="steam_id" maxlength="32" value="{{ dados.steam_id }}" placeholder="Opcional" />
+          <p class="hint">A sincronização Steam pode atualizar esse valor para o SteamID64 resolvido.</p>
+        </div>
+        <div class="profile-form-actions">
+          <span class="hint">Conta criada em {{ criado_em_formatado }}</span>
+          <button type="submit" class="btn btn-primary">Salvar alterações</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="perfil-senha-titulo">
+      <div class="section-heading-row">
+        <div>
+          <h2 id="perfil-senha-titulo">Alterar senha</h2>
+          <p class="hint">Confirme a senha atual antes de definir uma nova.</p>
+        </div>
+      </div>
+
+      {% if erro_senha %}
+      <p class="error-message" role="alert" style="margin-bottom: var(--space-4);">{{ erro_senha }}</p>
+      {% endif %}
+
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input type="hidden" name="acao" value="senha" />
+        <div class="field">
+          <label for="senha-atual">Senha atual</label>
+          <input type="password" id="senha-atual" name="senha_atual" autocomplete="current-password" required />
+        </div>
+        <div class="field">
+          <label for="nova-senha">Nova senha</label>
+          <input type="password" id="nova-senha" name="nova_senha" minlength="8" autocomplete="new-password" required />
+          <p class="hint">Mínimo de 8 caracteres.</p>
+        </div>
+        <div class="field">
+          <label for="confirmar-senha">Confirmar nova senha</label>
+          <input type="password" id="confirmar-senha" name="confirmar_senha" minlength="8" autocomplete="new-password" required />
+        </div>
+        <div class="profile-form-actions profile-form-actions--end">
+          <button type="submit" class="btn btn-primary">Atualizar senha</button>
+        </div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Desafios{% endblock %}
+
+{% block content %}
+  <header class="page-topbar">
+    <div>
+      <h1>Desafios pessoais</h1>
+      <p class="hint">Transforme metas de backlog, conquistas e speedrun em objetivos acompanháveis.</p>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-primary" id="btn-add-challenge">+ Novo desafio</button>
+    </div>
+  </header>
+
+  <dialog class="app-modal app-modal--wide" id="challenge-form-card" aria-labelledby="challenge-form-title">
+    <div class="app-modal__surface">
+      <div class="section-heading-row">
+        <h2 id="challenge-form-title">Novo desafio</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-close-challenge-form">Fechar</button>
+      </div>
+      <form id="challenge-form">
+      <div class="form-grid form-grid--2">
+        <div class="field">
+          <label for="challenge-title">Título</label>
+          <input type="text" id="challenge-title" maxlength="160" required placeholder="Ex: Finalizar 3 jogos este mês" />
+        </div>
+        <div class="field">
+          <label for="challenge-game">Jogo relacionado</label>
+          <select id="challenge-game">
+            <option value="">Nenhum jogo específico</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="challenge-type">Tipo</label>
+          <select id="challenge-type">
+            <option value="personalizado">Personalizado</option>
+            <option value="backlog">Backlog</option>
+            <option value="conquistas">Conquistas</option>
+            <option value="speedrun">Speedrun</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="challenge-status">Status</label>
+          <select id="challenge-status">
+            <option value="ativo">Ativo</option>
+            <option value="concluido">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="challenge-goal">Meta</label>
+          <input type="text" id="challenge-goal" maxlength="120" placeholder="Ex: 3 jogos, 100%, sub 45" />
+        </div>
+        <div class="field">
+          <label for="challenge-progress">Progresso</label>
+          <input type="text" id="challenge-progress" maxlength="120" placeholder="Ex: 2 / 3" />
+        </div>
+        <div class="field">
+          <label for="challenge-start">Data inicial</label>
+          <input type="date" id="challenge-start" />
+        </div>
+        <div class="field">
+          <label for="challenge-deadline">Data limite</label>
+          <input type="date" id="challenge-deadline" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="challenge-description">Descrição</label>
+        <textarea id="challenge-description" placeholder="Detalhes opcionais sobre a meta"></textarea>
+      </div>
+        <div class="app-modal__actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-challenge-form">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="challenge-submit">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <form class="filters-bar" id="challenge-filters" aria-label="Filtrar desafios">
+    <select id="challenge-status-filter">
+      <option value="">Status: todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="concluido">Concluídos</option>
+      <option value="cancelado">Cancelados</option>
+    </select>
+    <select id="challenge-type-filter">
+      <option value="">Tipo: todos</option>
+      <option value="backlog">Backlog</option>
+      <option value="conquistas">Conquistas</option>
+      <option value="speedrun">Speedrun</option>
+      <option value="personalizado">Personalizado</option>
+    </select>
+  </form>
+
+  <section aria-labelledby="challenge-list-title">
+    <h2 id="challenge-list-title" class="visually-hidden">Lista de desafios</h2>
+    <div class="builds-grid" id="challenges-grid"></div>
+    <p class="empty-state" id="challenge-empty" hidden>Você ainda não possui desafios com os filtros atuais.</p>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/desafios.js') }}"></script>
+{% endblock %}

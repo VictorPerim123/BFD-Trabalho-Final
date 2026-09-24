@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}{{ jogo.titulo }}{% endblock %}
+
+{% block content %}
+  <header class="page-topbar">
+    <div>
+      <a class="back-link" href="{{ url_for('pages.backlog') }}">← Voltar ao backlog</a>
+      <h1>{{ jogo.titulo }}</h1>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn btn-ghost" href="{{ url_for('pages.backlog', editar=jogo.id) }}">Editar</a>
+      <a class="btn btn-ghost" href="{{ url_for('pages.jornada', aba='runs', acao='nova-run', jogo_id=jogo.id) }}">Nova Run</a>
+      <a class="btn btn-ghost" href="{{ url_for('pages.jornada', aba='builds', jogo_id=jogo.id) }}">Jornada</a>
+      <button type="button" class="btn btn-danger-outline" id="btn-delete-game">Excluir</button>
+    </div>
+  </header>
+
+  <section class="game-detail" data-game-id="{{ jogo.id }}">
+    <div class="game-detail__sidebar">
+      <div class="game-detail__cover" id="detail-cover">
+        {% if jogo.capa_url %}
+          <img src="{{ jogo.capa_url }}" alt="Capa de {{ jogo.titulo }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove(); this.parentElement.classList.add('is-fallback');" />
+        {% endif %}
+        <span>Sem capa</span>
+      </div>
+
+      <div class="card detail-side-card">
+        <h2>Preferências</h2>
+        <div class="field">
+          <label for="detail-priority">Prioridade</label>
+          <select id="detail-priority">
+            <option value="baixa"{% if jogo.prioridade == 'baixa' %} selected{% endif %}>Baixa</option>
+            <option value="normal"{% if jogo.prioridade == 'normal' %} selected{% endif %}>Normal</option>
+            <option value="alta"{% if jogo.prioridade == 'alta' %} selected{% endif %}>Alta</option>
+          </select>
+        </div>
+        <dl class="detail-list">
+          <div><dt>Categorias</dt><dd>{{ jogo.categorias|map(attribute='nome')|join(', ') if jogo.categorias else 'Nenhuma' }}</dd></div>
+          {% if jogo.steam_appid %}<div><dt>Steam AppID</dt><dd>{{ jogo.steam_appid }}</dd></div>{% endif %}
+          <div><dt>Adicionado</dt><dd>{{ jogo.criado_em.strftime('%d/%m/%Y') if jogo.criado_em else '—' }}</dd></div>
+          <div><dt>Atualizado</dt><dd>{{ jogo.atualizado_em.strftime('%d/%m/%Y') if jogo.atualizado_em else '—' }}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="game-detail__content">
+      <div class="detail-header-row">
+        <div class="detail-badges">
+          <span class="badge {{ 'badge--' + jogo.status.replace('_', '-') }}">{{ jogo.status.replace('_', ' ')|title }}</span>
+          {% if jogo.steam_appid %}<span class="badge">Steam</span>{% else %}<span class="badge">Manual</span>{% endif %}
+          <span class="badge">Prioridade {{ jogo.prioridade }}</span>
+        </div>
+        <button type="button" class="favorite-button favorite-button--large{% if jogo.favorito %} is-active{% endif %}" id="detail-favorite" aria-pressed="{{ 'true' if jogo.favorito else 'false' }}" aria-label="{{ 'Remover dos favoritos' if jogo.favorito else 'Adicionar aos favoritos' }}">★</button>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-stat"><span>Tempo jogado</span><strong>{{ jogo.tempo_jogado_horas }}h</strong></div>
+        <div class="detail-stat"><span>Nota</span><strong>{{ jogo.nota if jogo.nota is not none else '—' }}</strong></div>
+        <div class="detail-stat"><span>Conquistas</span><strong>{{ jogo.conquistas_obtidas }}/{{ jogo.total_conquistas }}</strong></div>
+        <div class="detail-stat"><span>Progresso</span><strong>{{ jogo.percentual_conquistas }}%</strong></div>
+      </div>
+
+      <div class="progress-track progress-track--large" aria-label="{{ jogo.percentual_conquistas }}% das conquistas">
+        <div class="progress-fill" style="width: {{ jogo.percentual_conquistas }}%"></div>
+      </div>
+
+      <nav class="detail-tabs" aria-label="Seções do jogo">
+        <button type="button" class="detail-tab is-active" data-detail-tab="visao-geral" aria-selected="true">Visão geral</button>
+        <button type="button" class="detail-tab" data-detail-tab="conquistas" aria-selected="false">Conquistas <span>{{ jogo.conquistas_obtidas }}/{{ jogo.total_conquistas }}</span></button>
+        <button type="button" class="detail-tab" data-detail-tab="jornada" aria-selected="false">Jornada <span>{{ resumo.total_runs + resumo.total_builds }}</span></button>
+        <button type="button" class="detail-tab" data-detail-tab="desafios" aria-selected="false">Desafios <span>{{ resumo.desafios_ativos }}</span></button>
+        <button type="button" class="detail-tab" data-detail-tab="historico" aria-selected="false">Histórico</button>
+      </nav>
+
+      <div class="detail-panel" data-detail-panel="visao-geral">
+        <div class="detail-overview-grid">
+          <article class="detail-info">
+            <span>Próximo marco</span>
+            {% if jogo.total_conquistas > 0 and resumo.conquistas_faltantes > 0 %}
+              <strong>Faltam {{ resumo.conquistas_faltantes }} conquista(s)</strong>
+            {% elif jogo.total_conquistas > 0 %}
+              <strong>100% das conquistas</strong>
+            {% else %}
+              <strong>Sem conquistas disponíveis</strong>
+            {% endif %}
+          </article>
+          <article class="detail-info">
+            <span>Build em uso</span>
+            <strong>{{ resumo.build_ativa.nome_build if resumo.build_ativa else 'Nenhuma' }}</strong>
+          </article>
+          <article class="detail-info">
+            <span>Runs registradas</span>
+            <strong>{{ resumo.total_runs }}</strong>
+          </article>
+          <article class="detail-info">
+            <span>Desafios ativos</span>
+            <strong>{{ resumo.desafios_ativos }}</strong>
+          </article>
+        </div>
+
+        {% if resumo.pbs %}
+        <div class="detail-section detail-section--compact">
+          <div class="section-heading-row"><h2>Melhores tempos</h2><a class="btn btn-ghost btn-sm" href="{{ url_for('pages.jornada', aba='runs', jogo_id=jogo.id) }}">Abrir Jornada</a></div>
+          <div class="compact-list">
+            {% for run in resumo.pbs[:4] %}
+            <div class="compact-list__item">
+              <div><strong>{{ run.categoria }}</strong><span class="hint">Personal best</span></div>
+              <div class="compact-list__value"><span class="badge badge--platinado">PB</span><strong>{{ run.tempo_formatado }}</strong></div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="detail-section detail-section--compact">
+          <div class="section-heading-row"><h2>Atividade mais recente</h2></div>
+          {% if resumo.ultima_atividade %}
+            <div class="compact-list__item"><div><strong>{{ resumo.ultima_atividade.descricao }}</strong><span class="hint">{{ resumo.ultima_atividade.criado_em.strftime('%d/%m/%Y %H:%M') }}</span></div></div>
+          {% else %}
+            <p class="empty-state">As próximas ações relevantes aparecerão aqui.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="detail-panel" data-detail-panel="conquistas" hidden>
+        <div class="section-heading-row">
+          <div>
+            <h2>Conquistas Steam</h2>
+            {% if jogo.total_conquistas %}<span class="hint">{{ jogo.conquistas_obtidas }} de {{ jogo.total_conquistas }} desbloqueadas</span>{% endif %}
+          </div>
+        </div>
+
+        {% if conquistas %}
+          <div class="achievement-toolbar">
+            <input type="search" id="achievement-search" placeholder="Buscar conquista" aria-label="Buscar conquista" />
+            <select id="achievement-filter" aria-label="Filtrar conquistas">
+              <option value="todas">Todas</option>
+              <option value="desbloqueadas">Desbloqueadas</option>
+              <option value="bloqueadas">Bloqueadas</option>
+            </select>
+            <select id="achievement-sort" aria-label="Ordenar conquistas">
+              <option value="padrao">Desbloqueadas primeiro</option>
+              <option value="nome">Nome</option>
+              <option value="recentes">Desbloqueadas recentemente</option>
+            </select>
+          </div>
+          <div class="achievement-list" id="achievement-list">
+            {% for conquista in conquistas %}
+              <article class="achievement-item{% if conquista.desbloqueada %} is-unlocked{% endif %}" data-achievement-item data-unlocked="{{ '1' if conquista.desbloqueada else '0' }}" data-name="{{ conquista.nome or conquista.api_name }}" data-unlocked-at="{{ conquista.desbloqueada_em.strftime('%Y-%m-%dT%H:%M:%S') if conquista.desbloqueada_em else '' }}">
+                <div class="achievement-icon" aria-hidden="true">
+                  {% set icone = conquista.icone_url if conquista.desbloqueada else conquista.icone_bloqueada_url %}
+                  {% if icone %}
+                    <img src="{{ icone }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.remove(); this.parentElement.textContent='{{ '✓' if conquista.desbloqueada else '○' }}';" />
+                  {% else %}
+                    <span>{{ '✓' if conquista.desbloqueada else '○' }}</span>
+                  {% endif %}
+                </div>
+                <div>
+                  <strong>{{ conquista.nome or conquista.api_name }}</strong>
+                  {% if conquista.descricao %}<p>{{ conquista.descricao }}</p>{% endif %}
+                  {% if conquista.desbloqueada_em %}<span class="hint">Desbloqueada em {{ conquista.desbloqueada_em.strftime('%d/%m/%Y') }}</span>{% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+          <p class="empty-state" id="achievement-filter-empty" hidden>Nenhuma conquista corresponde aos filtros selecionados.</p>
+        {% elif jogo.steam_appid and jogo.total_conquistas %}
+          <p class="empty-state">Sincronize novamente a Steam para carregar o detalhamento das conquistas.</p>
+        {% else %}
+          <p class="empty-state">Nenhuma conquista detalhada disponível para este jogo.</p>
+        {% endif %}
+      </div>
+
+      <div class="detail-panel" data-detail-panel="jornada" hidden>
+        <div class="detail-section detail-section--first">
+          <div class="section-heading-row">
+            <h2>Builds</h2>
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.jornada', aba='builds', jogo_id=jogo.id) }}">Gerenciar builds</a>
+          </div>
+          {% if builds %}
+            <div class="mini-card-grid">
+              {% for build in builds[:6] %}
+                <article class="mini-card">
+                  <div class="game-card__meta">
+                    <strong>{{ build.nome_build }}</strong>
+                    <span class="badge{% if build.status == 'em_uso' %} badge--jogando{% elif build.status == 'finalizada' %} badge--zerado{% endif %}">{{ build.status.replace('_', ' ')|title }}</span>
+                  </div>
+                  {% if build.objetivo %}<p class="hint">{{ build.objetivo }}{% if build.nivel is not none %} · nível {{ build.nivel }}{% endif %}</p>{% endif %}
+                  {% if build.atributos %}
+                    <div class="attribute-list">
+                      {% for atributo in build.atributos[:6] %}<span class="attribute-chip"><strong>{{ atributo.nome }}</strong> {{ atributo.valor }}</span>{% endfor %}
+                    </div>
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">Nenhuma build registrada para este jogo.</p>
+          {% endif %}
+        </div>
+
+        <div class="detail-section">
+          <div class="section-heading-row">
+            <h2>Runs e speedrun</h2>
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.jornada', aba='runs', acao='nova-run', jogo_id=jogo.id) }}">Registrar run</a>
+          </div>
+          {% if runs %}
+            <div class="compact-list">
+              {% for run in runs %}
+                <div class="compact-list__item">
+                  <div>
+                    <strong>{{ run.categoria }}</strong>
+                    <span class="hint">{{ run.data.strftime('%d/%m/%Y') }}{% if run.build %} · {{ run.build.nome_build }}{% endif %}</span>
+                  </div>
+                  <div class="compact-list__value">
+                    {% if run.eh_pb %}<span class="badge badge--platinado">PB</span>{% endif %}
+                    <strong>{{ run.tempo_formatado }}</strong>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">Nenhuma run registrada para este jogo.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="detail-panel" data-detail-panel="desafios" hidden>
+        <div class="section-heading-row">
+          <div><h2>Desafios</h2><span class="hint">{{ resumo.desafios_ativos }} ativo(s)</span></div>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.desafios') }}">Gerenciar desafios</a>
+        </div>
+        {% if desafios %}
+          <div class="compact-list">
+            {% for desafio in desafios %}
+              <div class="compact-list__item">
+                <div>
+                  <strong>{{ desafio.titulo }}</strong>
+                  <span class="hint">{{ desafio.progresso or 'Sem progresso informado' }}{% if desafio.meta %} / {{ desafio.meta }}{% endif %}</span>
+                </div>
+                <span class="badge{% if desafio.status == 'concluido' %} badge--zerado{% elif desafio.status == 'cancelado' %} badge--abandonado{% else %} badge--jogando{% endif %}">{{ desafio.status|title }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-state">Nenhum desafio relacionado a este jogo.</p>
+        {% endif %}
+      </div>
+
+      <div class="detail-panel" data-detail-panel="historico" hidden>
+        <div class="section-heading-row"><h2>Histórico</h2><span class="hint">Últimos {{ historico|length }} eventos</span></div>
+        {% if historico %}
+          <ol class="timeline">
+            {% for evento in historico %}
+              <li>
+                <span class="timeline__marker" aria-hidden="true"></span>
+                <div><strong>{{ evento.descricao }}</strong><span class="hint">{{ evento.criado_em.strftime('%d/%m/%Y %H:%M') }}</span></div>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="empty-state">O histórico começa a ser preenchido conforme você evolui neste jogo.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jogo-detalhe.js') }}"></script>
+{% endblock %}

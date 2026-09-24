@@ -2,6 +2,7 @@ const SavePointUI = (() => {
   const STATUS_LABELS = {
     quero_jogar: "Quero Jogar",
     jogando: "Jogando",
+    jogado: "Jogado",
     zerado: "Zerado",
     platinado: "Platinado",
     abandonado: "Abandonado",
@@ -10,6 +11,7 @@ const SavePointUI = (() => {
   const STATUS_BADGE_CLASS = {
     quero_jogar: "badge--quero-jogar",
     jogando: "badge--jogando",
+    jogado: "badge--jogado",
     zerado: "badge--zerado",
     platinado: "badge--platinado",
     abandonado: "badge--abandonado",

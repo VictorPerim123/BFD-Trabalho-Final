@@ -4,44 +4,11 @@
 
 {% block content %}
   <header class="page-topbar">
-    <h1>Importar biblioteca da Steam</h1>
+    <div>
+      <h1>Importar biblioteca da Steam</h1>
+      <p class="hint">Analise as mudanças antes de aplicá-las ao seu backlog.</p>
+    </div>
   </header>
 
-  <section class="card" style="max-width: 480px;">
-    <p>
-      Isso <strong>não substitui</strong> o cadastro manual: adiciona jogos ainda
-      ausentes e associa a Steam a um cadastro manual quando encontra o mesmo
-      título, evitando duplicatas. O tempo jogado nunca é reduzido; status, nota
-      e categorias continuam sendo definidos por você. A sincronização também
-      atualiza a capa, o tempo jogado e o progresso de conquistas quando esses
-      dados estiverem disponíveis na Steam.
-    </p>
-
-    {% if erro %}
-    <p class="error-message" role="alert" style="margin-bottom: var(--space-4);">{{ erro }}</p>
-    {% endif %}
-
-    {% if resultado %}
-    <p class="hint" role="status" style="margin-bottom: var(--space-4);">
-      {{ resultado.importados }} jogo(s) importado(s), {{ resultado.vinculados }} cadastro(s) manual(is) associado(s), {{ resultado.atualizados }} jogo(s) sincronizado(s) e {{ resultado.ignorados }} sem alterações.
-    </p>
-    {% endif %}
-
-    <form method="post">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-      <div class="field">
-        <label for="steam-id">SteamID64 ou vanity URL</label>
-        <input type="text" id="steam-id" name="identificador" required
-               value="{{ steam_id_salvo }}"
-               placeholder="Ex: 76561197960434622 ou steamcommunity.com/id/seunome" />
-        <p class="hint">
-          Seu perfil e biblioteca de jogos precisam estar públicos na Steam
-          (Configurações da Steam → Privacidade) para a importação funcionar.
-        </p>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block">Importar</button>
-    </form>
-
-    <p class="auth-switch"><a href="{{ url_for('pages.backlog') }}">Voltar ao backlog</a></p>
-  </section>
+  {% include "_steam_import_content.html" %}
 {% endblock %}

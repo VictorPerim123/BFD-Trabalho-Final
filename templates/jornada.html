@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Jornada{% endblock %}
+
+{% block content %}
+  <header class="page-topbar">
+    <div>
+      <h1>Jornada</h1>
+      <p class="hint">Acompanhe builds, tentativas, categorias e recordes pessoais em um só lugar.</p>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" class="btn btn-ghost" id="btn-add-build">+ Nova build</button>
+      <button type="button" class="btn btn-primary" id="btn-add-run">+ Registrar run</button>
+    </div>
+  </header>
+
+  <section class="card jornada-toolbar" aria-label="Filtro da jornada">
+    <div class="field" style="margin:0;">
+      <label for="jornada-jogo-filter">Jogo</label>
+      <select id="jornada-jogo-filter">
+        <option value="">Todos os jogos</option>
+      </select>
+    </div>
+    <p class="hint" id="jornada-contexto">Visão geral de todos os jogos.</p>
+  </section>
+
+  <section class="stats-grid jornada-stats" aria-label="Resumo da jornada">
+    <div class="stat-card"><div class="stat-value" id="jornada-stat-builds">—</div><div class="stat-label">Builds em uso</div></div>
+    <div class="stat-card"><div class="stat-value" id="jornada-stat-runs">—</div><div class="stat-label">Runs</div></div>
+    <div class="stat-card"><div class="stat-value" id="jornada-stat-pbs">—</div><div class="stat-label">Recordes pessoais</div></div>
+    <div class="stat-card"><div class="stat-value jornada-last-activity" id="jornada-stat-ultima">—</div><div class="stat-label">Última atividade</div></div>
+  </section>
+
+  <div class="jornada-tabs" role="tablist" aria-label="Seções da jornada">
+    <button type="button" class="jornada-tab" id="tab-builds" role="tab" aria-controls="panel-builds" data-tab="builds">Builds</button>
+    <button type="button" class="jornada-tab" id="tab-runs" role="tab" aria-controls="panel-runs" data-tab="runs">Runs</button>
+  </div>
+
+  <section id="panel-builds" class="jornada-panel" role="tabpanel" aria-labelledby="tab-builds">
+    <dialog class="app-modal app-modal--wide" id="build-form-card" aria-labelledby="build-form-title">
+      <div class="app-modal__surface">
+      <div class="section-heading-row">
+        <h2 id="build-form-title">Nova build</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-build-form">Fechar</button>
+      </div>
+      <form id="build-form">
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label for="build-jogo">Jogo</label>
+            <select id="build-jogo" name="jogo_id" required><option value="">Carregando jogos…</option></select>
+          </div>
+          <div class="field">
+            <label for="build-nome">Nome da build</label>
+            <input type="text" id="build-nome" name="nome_build" maxlength="120" required placeholder="Ex: Samurai Bleed" />
+          </div>
+          <div class="field">
+            <label for="build-status">Status</label>
+            <select id="build-status" name="status">
+              <option value="planejada">Planejada</option>
+              <option value="em_uso">Em uso</option>
+              <option value="experimental">Experimental</option>
+              <option value="finalizada">Finalizada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="build-nivel">Nível</label>
+            <input type="number" id="build-nivel" name="nivel" min="0" step="1" placeholder="Opcional" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="build-objetivo">Objetivo</label>
+          <input type="text" id="build-objetivo" name="objetivo" maxlength="160" placeholder="Ex: PvE, bosses, NG+, speedrun" />
+        </div>
+        <div class="field">
+          <label for="build-descricao">Descrição</label>
+          <textarea id="build-descricao" name="descricao" placeholder="Resumo da proposta da build"></textarea>
+        </div>
+        <div class="field">
+          <label for="build-atributos">Atributos</label>
+          <textarea id="build-atributos" name="atributos_texto" placeholder="Força: 60&#10;Destreza: 25&#10;Critical Chance: 45%"></textarea>
+          <p class="hint">Use um atributo por linha no formato Nome: valor.</p>
+        </div>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label for="build-equipamento">Equipamento</label>
+            <textarea id="build-equipamento" name="detalhes_equipamento" placeholder="Armas, armaduras, itens e acessórios"></textarea>
+          </div>
+          <div class="field">
+            <label for="build-habilidades">Habilidades</label>
+            <textarea id="build-habilidades" name="habilidades" placeholder="Skills, talentos, feitiços e passivas"></textarea>
+          </div>
+        </div>
+        <div class="field">
+          <label for="build-observacoes">Observações</label>
+          <textarea id="build-observacoes" name="observacoes" placeholder="Ajustes, testes e observações gerais"></textarea>
+        </div>
+        <div class="app-modal__actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-build-form-bottom">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="build-submit">Salvar build</button>
+        </div>
+      </form>
+      </div>
+    </dialog>
+
+    <div class="builds-grid" id="builds-grid"></div>
+    <p class="empty-state" id="builds-empty" hidden>Nenhuma build encontrada para esta seleção.</p>
+  </section>
+
+  <section id="panel-runs" class="jornada-panel" role="tabpanel" aria-labelledby="tab-runs" hidden>
+    <dialog class="app-modal" id="run-form-card" aria-labelledby="run-form-title">
+      <div class="app-modal__surface">
+      <div class="section-heading-row">
+        <h2 id="run-form-title">Registrar run</h2>
+        <button type="button" class="btn btn-ghost btn-sm" id="btn-cancel-run-form">Fechar</button>
+      </div>
+      <form id="run-form" novalidate>
+        <div class="form-grid form-grid--2">
+          <div class="field">
+            <label for="run-jogo">Jogo</label>
+            <select id="run-jogo" name="jogo" required><option value="">Carregando jogos…</option></select>
+            <p class="error-message" id="erro-jogo" role="alert"></p>
+          </div>
+          <div class="field">
+            <label for="run-categoria">Categoria</label>
+            <input type="text" id="run-categoria" name="categoria" maxlength="80" value="Casual" required placeholder="Ex: Any%, All Bosses" />
+          </div>
+          <div class="field">
+            <label for="run-build">Build utilizada</label>
+            <select id="run-build" name="build_id"><option value="">Nenhuma build</option></select>
+          </div>
+          <div class="field">
+            <label for="run-data">Data da run</label>
+            <input type="date" id="run-data" name="data" required />
+            <p class="error-message" id="erro-data" role="alert"></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="run-tempo">Tempo de duração</label>
+          <input type="text" id="run-tempo" name="tempo" inputmode="numeric" maxlength="12" placeholder="00:25:30" required />
+          <p class="hint">Formato HH:MM:SS ou MM:SS.</p>
+          <p class="error-message" id="erro-tempo" role="alert"></p>
+        </div>
+        <fieldset class="toggle-group" aria-describedby="erro-resultado">
+          <legend>Resultado</legend>
+          <label class="toggle-option"><input type="radio" name="resultado" value="vitoria" required /><span>Vitória</span></label>
+          <label class="toggle-option"><input type="radio" name="resultado" value="derrota" required /><span>Derrota</span></label>
+        </fieldset>
+        <p class="error-message" id="erro-resultado" role="alert"></p>
+        <div class="field" id="causa-morte-wrapper" hidden>
+          <label for="run-causa-morte">Causa da morte</label>
+          <textarea id="run-causa-morte" name="causa_morte" maxlength="200" placeholder="Ex: Boss final, queda, rota perdida"></textarea>
+        </div>
+        <div class="field">
+          <label for="run-observacao">Observações</label>
+          <textarea id="run-observacao" name="observacao" maxlength="300" placeholder="Estratégia, rota e ajustes para a próxima tentativa"></textarea>
+        </div>
+        <div class="app-modal__actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-run-form-bottom">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="run-submit">Salvar run</button>
+        </div>
+      </form>
+      </div>
+    </dialog>
+
+    <form class="filters-bar" id="run-filters-form" aria-label="Filtrar runs">
+      <label for="run-categoria-filter" class="visually-hidden">Filtrar por categoria</label>
+      <select id="run-categoria-filter"><option value="">Categoria: todas</option></select>
+      <label for="run-resultado-filter" class="visually-hidden">Filtrar por resultado</label>
+      <select id="run-resultado-filter">
+        <option value="">Resultado: todos</option>
+        <option value="vitoria">Vitória</option>
+        <option value="derrota">Derrota</option>
+      </select>
+    </form>
+
+    <div class="builds-grid" id="runs-grid"></div>
+    <p class="empty-state" id="runs-empty" hidden>Nenhuma run encontrada para esta seleção.</p>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/jornada.js') }}"></script>
+{% endblock %}

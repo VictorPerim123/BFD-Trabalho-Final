@@ -1,0 +1,149 @@
+<div class="steam-import-layout steam-import-layout--single{% if previsao %} steam-import-layout--preview{% elif resultado %} steam-import-layout--result{% else %} steam-import-layout--form{% endif %}" data-steam-import-root data-steam-synced="{{ '1' if resultado else '0' }}">
+  {% if resultado %}
+  <section class="card steam-import-card steam-import-stage steam-import-stage--result" role="status">
+    <div class="sync-result sync-result--standalone">
+      <div class="sync-result__title">
+        <div>
+          <span class="dashboard-eyebrow">Concluído</span>
+          <h2>Sincronização aplicada</h2>
+        </div>
+        <span class="badge badge--zerado">Steam atualizada</span>
+      </div>
+      <div class="sync-result__grid">
+        <div><strong>{{ resultado.encontrados }}</strong><span>encontrados</span></div>
+        <div><strong>{{ resultado.importados }}</strong><span>novos</span></div>
+        <div><strong>{{ resultado.vinculados }}</strong><span>associados</span></div>
+        <div><strong>{{ resultado.atualizados }}</strong><span>atualizados</span></div>
+      </div>
+      <p class="hint">
+        {{ resultado.ignorados }} jogo(s) sem alterações. Conquistas: {{ resultado.conquistas_sincronizadas }} sincronizado(s), {{ resultado.conquistas_indisponiveis }} indisponível(is) e {{ resultado.conquistas_falharam }} falha(s).
+      </p>
+      {% if resultado.status_classificados %}
+      <p class="hint">{{ resultado.status_classificados }} status foram classificados automaticamente.</p>
+      {% endif %}
+    </div>
+    {% if modo_modal %}
+    <div class="steam-stage-actions">
+      <button type="button" class="btn btn-ghost" data-steam-restart>Sincronizar novamente</button>
+      <button type="button" class="btn btn-primary" data-steam-close>Concluir</button>
+    </div>
+    {% else %}
+    <div class="steam-stage-actions">
+      <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}">Sincronizar novamente</a>
+      <a class="btn btn-primary" href="{{ url_for('pages.backlog') }}">Voltar ao backlog</a>
+    </div>
+    {% endif %}
+  </section>
+
+  {% elif previsao %}
+  <section class="card steam-preview steam-import-stage steam-import-stage--preview" aria-labelledby="steam-preview-title{% if modo_modal %}-modal{% endif %}">
+    <div class="section-heading-row">
+      <div>
+        <span class="dashboard-eyebrow">Revisão</span>
+        <h2 id="steam-preview-title{% if modo_modal %}-modal{% endif %}">Prévia da sincronização</h2>
+        <p class="hint">Nenhuma alteração foi aplicada ainda.</p>
+      </div>
+      <span class="badge">Steam {{ previsao.steam_id }}</span>
+    </div>
+
+    <div class="sync-preview-grid">
+      <div class="preview-stat"><strong>{{ previsao.encontrados }}</strong><span>jogos encontrados</span></div>
+      <div class="preview-stat"><strong>{{ previsao.novos }}</strong><span>novos no backlog</span></div>
+      <div class="preview-stat"><strong>{{ previsao.vinculaveis }}</strong><span>cadastros manuais associáveis</span></div>
+      <div class="preview-stat"><strong>{{ previsao.existentes }}</strong><span>já vinculados à Steam</span></div>
+      <div class="preview-stat"><strong>{{ previsao.atualizacoes_previstas }}</strong><span>jogos com alterações detectadas</span></div>
+      <div class="preview-stat"><strong>{{ previsao.sem_alteracao_prevista }}</strong><span>sem alteração detectada</span></div>
+      <div class="preview-stat"><strong>{{ previsao.status_preservados }}</strong><span>status preservados</span></div>
+    </div>
+
+    <div class="preview-section">
+      <h3>Status que serão aplicados a jogos novos ou reclassificados</h3>
+      <p class="hint">Classificação: {{ 'automática' if previsao.classificacao_automatica else 'manter como Quero jogar' }} · Reclassificar existentes em Quero jogar: {{ 'sim' if previsao.reclassificar_existentes else 'não' }}.</p>
+      <div class="status-preview-list">
+        <span class="badge badge--quero-jogar">Quero jogar · {{ previsao.status_previstos.quero_jogar }}</span>
+        <span class="badge badge--jogando">Jogando · {{ previsao.status_previstos.jogando }}</span>
+        <span class="badge badge--jogado">Jogado · {{ previsao.status_previstos.jogado }}</span>
+        <span class="badge badge--platinado">Platinado · {{ previsao.status_previstos.platinado }}</span>
+      </div>
+      {% if previsao.status_reclassificados %}
+      <p class="hint">{{ previsao.status_reclassificados }} jogo(s) existente(s) em Quero jogar serão reclassificados.</p>
+      {% endif %}
+      {% if previsao.falhas_conquistas %}
+      <p class="warning-message">{{ previsao.falhas_conquistas }} jogo(s) não tiveram conquistas disponíveis durante a análise. A sincronização final tentará novamente.</p>
+      {% endif %}
+    </div>
+
+    <div class="preview-note">
+      <strong>O que acontece ao confirmar?</strong>
+      <p>A Steam será consultada novamente para obter capas e detalhes completos das conquistas. Escolhas manuais como Zerado e Abandonado permanecem preservadas.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('steam.importar') }}" data-steam-form data-steam-ajax="{{ '1' if modo_modal else '0' }}" data-loading-label="Sincronizando…">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="acao" value="sincronizar" />
+      <input type="hidden" name="identificador" value="{{ identificador }}" />
+      <input type="hidden" name="classificacao_status" value="{{ classificacao_status }}" />
+      {% if reclassificar_existentes %}<input type="hidden" name="reclassificar_existentes" value="1" />{% endif %}
+      {% if modo_modal %}<input type="hidden" name="modo_modal" value="1" />{% endif %}
+      <div class="steam-stage-actions steam-stage-actions--split">
+        {% if modo_modal %}
+        <button type="button" class="btn btn-ghost" data-steam-restart>Alterar opções</button>
+        {% else %}
+        <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}">Alterar opções</a>
+        {% endif %}
+        <button type="submit" class="btn btn-primary" data-submit-label>Confirmar sincronização</button>
+      </div>
+      <div class="import-progress" data-import-progress role="status" aria-live="polite">
+        <strong>Sincronizando biblioteca Steam…</strong>
+        <p class="hint">Buscando capas, metadados completos e ícones das conquistas. Bibliotecas grandes podem levar alguns instantes.</p>
+      </div>
+    </form>
+  </section>
+
+  {% else %}
+  <section class="card steam-import-card steam-import-stage steam-import-stage--form">
+
+    {% if erro %}
+    <p class="error-message" role="alert" style="margin-bottom: var(--space-4);">{{ erro }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('steam.importar') }}" id="steam-preview-form" data-steam-form data-steam-ajax="{{ '1' if modo_modal else '0' }}" data-loading-label="Analisando…">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="acao" value="previsualizar" />
+      {% if modo_modal %}<input type="hidden" name="modo_modal" value="1" />{% endif %}
+      <div class="field">
+        <label for="steam-id{% if modo_modal %}-modal{% endif %}">SteamID64 ou vanity URL</label>
+        <input type="text" id="steam-id{% if modo_modal %}-modal{% endif %}" name="identificador" required value="{{ identificador }}" placeholder="Ex: 76561197960434622 ou steamcommunity.com/id/seunome" />
+        <p class="hint">Seu perfil e os detalhes dos jogos precisam estar públicos na Steam para a análise completa.</p>
+      </div>
+
+      <fieldset class="toggle-group" aria-describedby="steam-status-hint{% if modo_modal %}-modal{% endif %}">
+        <legend>Status dos jogos importados</legend>
+        <label class="toggle-option">
+          <input type="radio" name="classificacao_status" value="automatico"{% if classificacao_status == 'automatico' %} checked{% endif %} />
+          <span>Classificar automaticamente</span>
+        </label>
+        <label class="toggle-option">
+          <input type="radio" name="classificacao_status" value="manter"{% if classificacao_status != 'automatico' %} checked{% endif %} />
+          <span>Manter como Quero jogar</span>
+        </label>
+      </fieldset>
+
+      <div class="checkbox-field" style="margin-bottom: var(--space-4);">
+        <label for="steam-reclassificar{% if modo_modal %}-modal{% endif %}">
+          <input type="checkbox" id="steam-reclassificar{% if modo_modal %}-modal{% endif %}" name="reclassificar_existentes" value="1"{% if reclassificar_existentes %} checked{% endif %} />
+          Reclassificar também jogos Steam existentes que ainda estão como Quero jogar
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" data-submit-label>Analisar biblioteca</button>
+      <div class="import-progress" data-import-progress role="status" aria-live="polite">
+        <strong>Analisando biblioteca Steam…</strong>
+        <p class="hint">A prévia consulta biblioteca, atividade recente e progresso de conquistas, mas ainda não altera o banco.</p>
+      </div>
+    </form>
+
+    {% if not modo_modal %}<p class="auth-switch"><a href="{{ url_for('pages.backlog') }}">Voltar ao backlog</a></p>{% endif %}
+  </section>
+  {% endif %}
+</div>

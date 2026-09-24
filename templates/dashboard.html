@@ -3,38 +3,188 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-  <header class="page-topbar">
-    <h1>Dashboard</h1>
-  </header>
+  <div id="dashboard-root" aria-busy="true">
+    <section class="dashboard-hero" aria-labelledby="dashboard-title">
+      <div class="dashboard-hero__copy">
+        <span class="dashboard-eyebrow">Visão geral</span>
+        <h1 id="dashboard-title">Olá, {{ usuario_logado.nome if usuario_logado else 'jogador' }}.</h1>
+        <p>Veja o que está em andamento, acompanhe seu progresso e escolha rapidamente o próximo passo.</p>
+        <div class="dashboard-hero__actions">
+          <a class="btn btn-primary" href="{{ url_for('pages.backlog') }}?status=jogando">Continuar jogando</a>
+          <a class="btn btn-ghost" href="{{ url_for('steam.importar') }}" data-steam-modal-trigger>Sincronizar Steam</a>
+        </div>
+      </div>
 
-  <section aria-labelledby="titulo-estatisticas">
-    <h2 id="titulo-estatisticas" class="visually-hidden">Estatísticas gerais</h2>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-zerados">—</div>
-        <div class="stat-label">Jogos zerados</div>
+      <div class="dashboard-hero__progress" aria-label="Resumo de progresso">
+        <div class="dashboard-progress-card">
+          <div class="dashboard-progress-card__heading">
+            <span>Biblioteca concluída</span>
+            <strong id="library-progress-label">—</strong>
+          </div>
+          <div class="progress-track progress-track--dashboard" aria-hidden="true">
+            <div class="progress-fill" id="library-progress-bar" style="width:0%"></div>
+          </div>
+          <p id="library-progress-copy">Calculando seu progresso…</p>
+        </div>
+        <div class="dashboard-progress-card">
+          <div class="dashboard-progress-card__heading">
+            <span>Conquistas obtidas</span>
+            <strong id="achievement-progress-label">—</strong>
+          </div>
+          <div class="progress-track progress-track--dashboard" aria-hidden="true">
+            <div class="progress-fill" id="achievement-progress-bar" style="width:0%"></div>
+          </div>
+          <p id="achievement-progress-copy">Calculando seu progresso…</p>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-horas">—</div>
-        <div class="stat-label">Tempo acumulado</div>
+    </section>
+
+    <div class="dashboard-alert" id="dashboard-error" role="alert" hidden>
+      <div>
+        <strong>Não foi possível atualizar o dashboard.</strong>
+        <span>Seus dados não foram alterados. Tente carregar novamente.</span>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-nota">—</div>
-        <div class="stat-label">Nota média</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-runs">—</div>
-        <div class="stat-label">Runs registradas</div>
-      </div>
+      <button class="btn btn-ghost btn-sm" type="button" id="dashboard-retry">Tentar novamente</button>
     </div>
-  </section>
 
-  <section aria-labelledby="titulo-jogando">
-    <h2 id="titulo-jogando">Jogando agora</h2>
-    <ul class="recent-list" id="recent-games-list">
-      <li>Carregando…</li>
-    </ul>
-  </section>
+    <section aria-labelledby="titulo-estatisticas">
+      <div class="section-heading-row dashboard-section-heading">
+        <div>
+          <span class="dashboard-eyebrow">Biblioteca</span>
+          <h2 id="titulo-estatisticas">Números principais</h2>
+        </div>
+      </div>
+      <div class="dashboard-metrics-grid">
+        <a class="dashboard-metric" href="{{ url_for('pages.backlog') }}">
+          <span class="dashboard-metric__label">Jogos na biblioteca</span>
+          <strong class="dashboard-metric__value" id="stat-games">—</strong>
+          <span class="dashboard-metric__meta" id="stat-games-meta">Carregando…</span>
+        </a>
+        <div class="dashboard-metric">
+          <span class="dashboard-metric__label">Tempo registrado</span>
+          <strong class="dashboard-metric__value" id="stat-hours">—</strong>
+          <span class="dashboard-metric__meta">horas somadas da biblioteca</span>
+        </div>
+        <a class="dashboard-metric" href="{{ url_for('pages.jornada') }}?aba=runs">
+          <span class="dashboard-metric__label">Runs registradas</span>
+          <strong class="dashboard-metric__value" id="stat-runs">—</strong>
+          <span class="dashboard-metric__meta">histórico da sua jornada</span>
+        </a>
+        <div class="dashboard-metric">
+          <span class="dashboard-metric__label">Nota média</span>
+          <strong class="dashboard-metric__value" id="stat-rating">—</strong>
+          <span class="dashboard-metric__meta" id="stat-rating-meta">somente jogos avaliados</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="dashboard-focus-grid">
+      <section class="card dashboard-card dashboard-card--feature" aria-labelledby="playing-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Agora</span>
+            <h2 id="playing-title">Continue sua jornada</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.backlog') }}?status=jogando">Ver backlog</a>
+        </div>
+        <div id="playing-now" class="dashboard-loading-list" aria-live="polite">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+        </div>
+      </section>
+
+      <section class="card dashboard-card" id="quase-concluidos" aria-labelledby="almost-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Progresso</span>
+            <h2 id="almost-title">Quase concluídos</h2>
+          </div>
+          <span class="dashboard-section-count" id="almost-count">—</span>
+        </div>
+        <div id="almost-complete" class="dashboard-loading-list" aria-live="polite">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard-insights-grid">
+      <section class="card dashboard-card" aria-labelledby="health-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Panorama</span>
+            <h2 id="health-title">Saúde do backlog</h2>
+          </div>
+          <span class="hint">últimos 30 dias</span>
+        </div>
+        <div class="health-grid" id="health-grid">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton"></span>
+        </div>
+        <div class="health-balance" id="health-balance"></div>
+      </section>
+
+      <section class="card dashboard-card" aria-labelledby="status-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Distribuição</span>
+            <h2 id="status-title">Status da biblioteca</h2>
+          </div>
+        </div>
+        <div class="status-distribution" id="status-distribution">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard-support-grid">
+      <section class="card dashboard-card" aria-labelledby="challenges-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Metas</span>
+            <h2 id="challenges-title">Desafios ativos</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.desafios') }}">Ver todos</a>
+        </div>
+        <div id="active-challenges" class="dashboard-loading-list" aria-live="polite">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+        </div>
+      </section>
+
+      <section class="card dashboard-card" aria-labelledby="journey-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="dashboard-eyebrow">Jornada</span>
+            <h2 id="journey-title">Em destaque</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('pages.jornada') }}">Abrir jornada</a>
+        </div>
+        <div id="journey-highlights" class="dashboard-loading-list" aria-live="polite">
+          <span class="dashboard-skeleton"></span>
+          <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+        </div>
+      </section>
+    </div>
+
+    <section class="card dashboard-card dashboard-activity-card" aria-labelledby="activity-title">
+      <div class="section-heading-row">
+        <div>
+          <span class="dashboard-eyebrow">Linha do tempo</span>
+          <h2 id="activity-title">Atividade recente</h2>
+        </div>
+      </div>
+      <div id="recent-activity" class="dashboard-loading-list" aria-live="polite">
+        <span class="dashboard-skeleton"></span>
+        <span class="dashboard-skeleton"></span>
+        <span class="dashboard-skeleton dashboard-skeleton--short"></span>
+      </div>
+    </section>
+  </div>
 {% endblock %}
 
 {% block scripts %}

@@ -3,6 +3,7 @@ const SavePointAPI = (() => {
     games: "/api/jogos",
     runs: "/api/runs",
     builds: "/api/builds",
+    desafios: "/api/desafios",
     estatisticas: "/api/estatisticas",
   };
 
@@ -45,6 +46,22 @@ const SavePointAPI = (() => {
 
   function getGames() {
     return requisitar(ENDPOINTS.games);
+  }
+
+  function getGamesPage(params = {}) {
+    const query = new URLSearchParams({ paginado: "1", ...params });
+    return requisitar(`${ENDPOINTS.games}?${query.toString()}`);
+  }
+
+  function getGame(id) {
+    return requisitar(`${ENDPOINTS.games}/${id}`);
+  }
+
+  function updateGamePreferences(id, preferences) {
+    return requisitar(`${ENDPOINTS.games}/${id}/preferencias`, {
+      method: "PATCH",
+      body: JSON.stringify(preferences),
+    });
   }
 
   function saveGame(game) {
@@ -114,12 +131,41 @@ const SavePointAPI = (() => {
     return requisitar(`${ENDPOINTS.builds}/${id}`, { method: "DELETE" });
   }
 
+
+  function getChallenges() {
+    return requisitar(ENDPOINTS.desafios);
+  }
+
+  function getChallenge(id) {
+    return requisitar(`${ENDPOINTS.desafios}/${id}`);
+  }
+
+  function saveChallenge(challenge) {
+    if (challenge.id) {
+      return requisitar(`${ENDPOINTS.desafios}/${challenge.id}`, {
+        method: "PUT",
+        body: JSON.stringify(challenge),
+      });
+    }
+    return requisitar(ENDPOINTS.desafios, {
+      method: "POST",
+      body: JSON.stringify(challenge),
+    });
+  }
+
+  function deleteChallenge(id) {
+    return requisitar(`${ENDPOINTS.desafios}/${id}`, { method: "DELETE" });
+  }
+
   function getEstatisticas() {
     return requisitar(ENDPOINTS.estatisticas);
   }
 
   return {
     getGames,
+    getGamesPage,
+    getGame,
+    updateGamePreferences,
     saveGame,
     deleteGame,
     getRuns,
@@ -130,6 +176,10 @@ const SavePointAPI = (() => {
     getBuild,
     saveBuild,
     deleteBuild,
+    getChallenges,
+    getChallenge,
+    saveChallenge,
+    deleteChallenge,
     getEstatisticas,
   };
 })();
