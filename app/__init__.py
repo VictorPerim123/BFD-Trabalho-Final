@@ -2,9 +2,10 @@ import logging
 import os
 
 from flask import Flask, jsonify, render_template, request
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import Config
-from app.extensions import csrf, db
+from app.extensions import csrf, db, migrate
 
 
 NAV_ITEMS = [
@@ -21,22 +22,16 @@ NAV_ITEMS = [
         "icon": "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
     },
     {
-        "endpoint": "pages.run_form",
-        "label": "Registrar Run",
-        "short_label": "Nova Run",
-        "icon": "M13 2L3 14h6l-1 8 11-14h-7z",
+        "endpoint": "pages.jornada",
+        "label": "Jornada",
+        "short_label": "Jornada",
+        "icon": "M4 19h16v2H4zm1-4 4-4 3 3 6-7 1.5 1.3-7.4 8.6-3-3L6.4 16.4z",
     },
     {
-        "endpoint": "pages.runs",
-        "label": "Minhas Runs",
-        "short_label": "Runs",
-        "icon": "M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z",
-    },
-    {
-        "endpoint": "pages.builds",
-        "label": "Minhas Builds",
-        "short_label": "Builds",
-        "icon": "M22 6.5a4.5 4.5 0 01-6.36 4.1L9.5 16.7a2 2 0 11-2.83-2.83l6.1-6.14A4.5 4.5 0 1122 6.5z",
+        "endpoint": "pages.desafios",
+        "label": "Desafios",
+        "short_label": "Metas",
+        "icon": "M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 4a6 6 0 11-6 6 6 6 0 016-6zm0 3a3 3 0 103 3 3 3 0 00-3-3z",
     },
 ]
 
@@ -49,19 +44,13 @@ def create_app(config_class=Config):
 
     db.init_app(app)
     csrf.init_app(app)
+    migrate.init_app(app, db)
 
     _configurar_logs(app)
     _registrar_blueprints(app)
     _registrar_error_handlers(app)
     _registrar_context_processors(app)
     _registrar_cabecalhos_seguranca(app)
-
-    with app.app_context():
-        from app import models
-        from app.db_maintenance import aplicar_migracoes_compatibilidade
-
-        db.create_all()
-        aplicar_migracoes_compatibilidade()
 
     return app
 
@@ -73,6 +62,7 @@ def _registrar_blueprints(app):
     from app.routes.api_runs import api_runs_bp
     from app.routes.api_builds import api_builds_bp
     from app.routes.api_estatisticas import api_estatisticas_bp
+    from app.routes.api_desafios import api_desafios_bp
     from app.routes.steam import steam_bp
     from app.routes.export import export_bp
 
@@ -82,6 +72,7 @@ def _registrar_blueprints(app):
     app.register_blueprint(api_runs_bp)
     app.register_blueprint(api_builds_bp)
     app.register_blueprint(api_estatisticas_bp)
+    app.register_blueprint(api_desafios_bp)
     app.register_blueprint(steam_bp)
     app.register_blueprint(export_bp)
 
@@ -124,7 +115,12 @@ def _registrar_context_processors(app):
     def injetar_globais():
         from app.utils.auth import usuario_atual
 
-        return {"nav_items": NAV_ITEMS, "usuario_logado": usuario_atual()}
+        try:
+            usuario = usuario_atual()
+        except SQLAlchemyError:
+            db.session.rollback()
+            usuario = None
+        return {"nav_items": NAV_ITEMS, "usuario_logado": usuario}
 
 
 def _registrar_cabecalhos_seguranca(app):

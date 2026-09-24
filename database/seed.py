@@ -11,7 +11,7 @@ load_dotenv()
 
 from app import create_app
 from app.extensions import db
-from app.models import Usuario, Jogo, Categoria, RunDiario, BuildAnotacao
+from app.models import BuildAnotacao, BuildAtributo, Categoria, Desafio, HistoricoJogo, Jogo, RunDiario, Usuario
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 log = logging.getLogger("seed")
@@ -23,7 +23,7 @@ JOGOS_EXEMPLO = [
         "nota": 9.5,
         "tempo_jogado_horas": 62,
         "total_conquistas": 42,
-        "conquistas_obtidas": 27,
+        "conquistas_obtidas": 32,
         "categorias": ["RPG", "Souls-like"],
     },
     {
@@ -74,14 +74,51 @@ JOGOS_EXEMPLO = [
 ]
 
 RUNS_EXEMPLO = [
-    {"jogo": "The Binding of Isaac", "data": "2026-08-09", "duracao_segundos": 32 * 60 + 15, "resultado": "derrota", "causa_morte": "Delirium na Cave"},
-    {"jogo": "The Binding of Isaac", "data": "2026-08-08", "duracao_segundos": 21 * 60 + 40, "resultado": "vitoria", "causa_morte": None},
-    {"jogo": "Dead Cells", "data": "2026-08-05", "duracao_segundos": 14 * 60 + 2, "resultado": "derrota", "causa_morte": "Concierge (DLC)"},
+    {"jogo": "The Binding of Isaac", "data": "2026-08-09", "duracao_segundos": 32 * 60 + 15, "resultado": "derrota", "categoria": "Any%", "causa_morte": "Delirium na Cave", "eh_pb": False},
+    {"jogo": "The Binding of Isaac", "data": "2026-08-08", "duracao_segundos": 21 * 60 + 40, "resultado": "vitoria", "categoria": "Any%", "causa_morte": None, "eh_pb": True},
+    {"jogo": "Dead Cells", "data": "2026-08-05", "duracao_segundos": 14 * 60 + 2, "resultado": "derrota", "categoria": "Any%", "causa_morte": "Concierge (DLC)", "eh_pb": False},
 ]
 
 BUILDS_EXEMPLO = [
-    {"jogo": "Elden Ring", "nome_build": "Sanguinário Faminto", "detalhes_equipamento": "Espada Rivers of Blood + Escudo Brass", "habilidades": "Foco em Sangramento (Arcane) e Vigor alto"},
-    {"jogo": "Baldur's Gate 3", "nome_build": "Mago Elemental", "detalhes_equipamento": "Cajado do Arqui-mago + Anel de Absorção", "habilidades": "Bola de Fogo, Raio, Metamagia Estendida"},
+    {
+        "jogo": "Elden Ring",
+        "nome_build": "Sanguinário Faminto",
+        "descricao": "Build de sangramento para chefes e exploração em NG+.",
+        "objetivo": "PvE / Bosses",
+        "status": "em_uso",
+        "nivel": 125,
+        "detalhes_equipamento": "Rivers of Blood + White Mask",
+        "habilidades": "Corpse Piler e buffs de sangramento",
+        "atributos": [("Vigor", "50"), ("Destreza", "45"), ("Arcano", "55")],
+    },
+    {
+        "jogo": "Baldur's Gate 3",
+        "nome_build": "Mago Elemental",
+        "descricao": "Controle e dano elemental à distância.",
+        "objetivo": "Campanha",
+        "status": "finalizada",
+        "nivel": 12,
+        "detalhes_equipamento": "Cajado do Arqui-mago + Anel de Absorção",
+        "habilidades": "Bola de Fogo, Raio, Metamagia Estendida",
+        "atributos": [("Inteligência", "20"), ("Constituição", "16")],
+    },
+]
+
+DESAFIOS_EXEMPLO = [
+    {
+        "jogo": "Elden Ring",
+        "titulo": "Chegar a 100% das conquistas",
+        "tipo": "conquistas",
+        "meta": "42 conquistas",
+        "progresso": "32 / 42",
+    },
+    {
+        "jogo": None,
+        "titulo": "Finalizar 3 jogos do backlog",
+        "tipo": "backlog",
+        "meta": "3 jogos",
+        "progresso": "1 / 3",
+    },
 ]
 
 
@@ -126,7 +163,9 @@ def seed():
                 data=date.fromisoformat(dados["data"]),
                 duracao_segundos=dados["duracao_segundos"],
                 resultado=dados["resultado"],
+                categoria=dados["categoria"],
                 causa_morte=dados["causa_morte"],
+                eh_pb=dados["eh_pb"],
             )
             db.session.add(run)
 
@@ -134,10 +173,60 @@ def seed():
             build = BuildAnotacao(
                 jogo_id=jogos_por_titulo[dados["jogo"]].id,
                 nome_build=dados["nome_build"],
+                descricao=dados["descricao"],
+                objetivo=dados["objetivo"],
+                status=dados["status"],
+                nivel=dados["nivel"],
                 detalhes_equipamento=dados["detalhes_equipamento"],
                 habilidades=dados["habilidades"],
             )
+            build.atributos = [
+                BuildAtributo(nome=nome, valor=valor, ordem=ordem)
+                for ordem, (nome, valor) in enumerate(dados["atributos"])
+            ]
             db.session.add(build)
+
+        for dados in DESAFIOS_EXEMPLO:
+            jogo = jogos_por_titulo.get(dados["jogo"]) if dados["jogo"] else None
+            db.session.add(
+                Desafio(
+                    usuario_id=usuario.id,
+                    jogo_id=jogo.id if jogo else None,
+                    titulo=dados["titulo"],
+                    tipo=dados["tipo"],
+                    meta=dados["meta"],
+                    progresso=dados["progresso"],
+                )
+            )
+
+        db.session.add(
+            HistoricoJogo(
+                jogo_id=jogos_por_titulo["Elden Ring"].id,
+                tipo="INICIADO",
+                descricao="Jogo marcado como em andamento",
+            )
+        )
+        db.session.add(
+            HistoricoJogo(
+                jogo_id=jogos_por_titulo["The Binding of Isaac"].id,
+                tipo="PB_SPEEDRUN",
+                descricao="Novo PB em Any%: 00:21:40",
+            )
+        )
+        db.session.add(
+            HistoricoJogo(
+                jogo_id=jogos_por_titulo["Cyberpunk 2077"].id,
+                tipo="ZERADO",
+                descricao="Jogo marcado como zerado",
+            )
+        )
+        db.session.add(
+            HistoricoJogo(
+                jogo_id=jogos_por_titulo["Baldur's Gate 3"].id,
+                tipo="PLATINADO",
+                descricao="Jogo marcado como platinado",
+            )
+        )
 
         db.session.commit()
         log.info("Banco semeado com sucesso.")

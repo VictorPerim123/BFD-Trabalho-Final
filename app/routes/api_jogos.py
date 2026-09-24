@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 
 from app.services.backlog_service import BacklogService, ErroDeValidacao, RecursoNaoEncontrado
 from app.utils.auth import api_login_required, usuario_atual
@@ -10,7 +10,23 @@ api_jogos_bp = Blueprint("api_jogos", __name__, url_prefix="/api/jogos")
 @api_login_required
 def listar():
     servico = BacklogService(usuario_atual())
-    return jsonify([jogo.to_dict() for jogo in servico.listar_jogos()])
+    if not request.args:
+        return jsonify([jogo.to_dict() for jogo in servico.listar_jogos()])
+    try:
+        return jsonify(servico.listar_jogos_paginados(request.args))
+    except ErroDeValidacao as erro:
+        return jsonify({"erro": str(erro)}), 400
+
+
+@api_jogos_bp.route("/<int:jogo_id>", methods=["GET"])
+@api_login_required
+def detalhar(jogo_id):
+    servico = BacklogService(usuario_atual())
+    try:
+        jogo = servico.obter_jogo(jogo_id)
+    except RecursoNaoEncontrado as erro:
+        return jsonify({"erro": str(erro)}), 404
+    return jsonify(jogo.to_dict())
 
 
 @api_jogos_bp.route("", methods=["POST"])
@@ -30,6 +46,19 @@ def atualizar(jogo_id):
     servico = BacklogService(usuario_atual())
     try:
         jogo = servico.atualizar_jogo(jogo_id, request.get_json(silent=True) or {})
+    except ErroDeValidacao as erro:
+        return jsonify({"erro": str(erro)}), 400
+    except RecursoNaoEncontrado as erro:
+        return jsonify({"erro": str(erro)}), 404
+    return jsonify(jogo.to_dict())
+
+
+@api_jogos_bp.route("/<int:jogo_id>/preferencias", methods=["PATCH"])
+@api_login_required
+def atualizar_preferencias(jogo_id):
+    servico = BacklogService(usuario_atual())
+    try:
+        jogo = servico.atualizar_preferencias_jogo(jogo_id, request.get_json(silent=True) or {})
     except ErroDeValidacao as erro:
         return jsonify({"erro": str(erro)}), 400
     except RecursoNaoEncontrado as erro:

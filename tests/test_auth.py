@@ -95,3 +95,98 @@ def test_respostas_incluem_cabecalhos_de_seguranca(client):
     assert resposta.headers["X-Content-Type-Options"] == "nosniff"
     assert resposta.headers["X-Frame-Options"] == "DENY"
     assert resposta.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
+
+
+def test_perfil_exige_autenticacao(client):
+    resposta = client.get("/perfil", follow_redirects=False)
+
+    assert resposta.status_code == 302
+    assert "/login" in resposta.headers["Location"]
+
+
+
+def test_perfil_renderiza_para_usuario_autenticado(client_autenticado):
+    resposta = client_autenticado.get("/perfil")
+
+    assert resposta.status_code == 200
+    conteudo = resposta.get_data(as_text=True)
+    assert "Meu perfil" in conteudo
+    assert "jogadorteste" in conteudo
+    assert "teste@savepoint.dev" in conteudo
+
+def test_perfil_atualiza_dados_do_usuario(client_autenticado, app, usuario):
+    resposta = client_autenticado.post(
+        "/perfil",
+        data={
+            "acao": "dados",
+            "nome": "Jogador Atualizado",
+            "username": "jogadornovo",
+            "email": "novo@savepoint.dev",
+            "steam_id": "76561197960287930",
+        },
+        follow_redirects=False,
+    )
+
+    assert resposta.status_code == 302
+    with app.app_context():
+        atualizado = Usuario.query.get(usuario.id)
+        assert atualizado.nome == "Jogador Atualizado"
+        assert atualizado.username == "jogadornovo"
+        assert atualizado.email == "novo@savepoint.dev"
+        assert atualizado.steam_id == "76561197960287930"
+
+
+def test_perfil_rejeita_username_ou_email_duplicado(client_autenticado, app):
+    with app.app_context():
+        outro = Usuario(nome="Outro", username="outro", email="outro@savepoint.dev")
+        outro.set_senha("SenhaForte123")
+        from app.extensions import db
+        db.session.add(outro)
+        db.session.commit()
+
+    resposta = client_autenticado.post(
+        "/perfil",
+        data={
+            "acao": "dados",
+            "nome": "Jogador",
+            "username": "outro",
+            "email": "jogador@savepoint.dev",
+            "steam_id": "",
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert "Já existe uma conta" in resposta.get_data(as_text=True)
+
+
+def test_perfil_altera_senha_com_confirmacao_da_atual(client_autenticado, app, usuario):
+    resposta = client_autenticado.post(
+        "/perfil",
+        data={
+            "acao": "senha",
+            "senha_atual": "SenhaForte123",
+            "nova_senha": "NovaSenha456",
+            "confirmar_senha": "NovaSenha456",
+        },
+        follow_redirects=False,
+    )
+
+    assert resposta.status_code == 302
+    with app.app_context():
+        atualizado = Usuario.query.get(usuario.id)
+        assert atualizado.verificar_senha("NovaSenha456") is True
+
+
+def test_perfil_rejeita_senha_atual_incorreta(client_autenticado):
+    resposta = client_autenticado.post(
+        "/perfil",
+        data={
+            "acao": "senha",
+            "senha_atual": "Errada123",
+            "nova_senha": "NovaSenha456",
+            "confirmar_senha": "NovaSenha456",
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert "senha atual está incorreta" in resposta.get_data(as_text=True)

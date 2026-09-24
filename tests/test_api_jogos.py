@@ -59,3 +59,49 @@ def test_api_rejeita_conquistas_acima_do_total(client_autenticado):
         json={"titulo": "Jogo inválido", "total_conquistas": 10, "conquistas_obtidas": 12},
     )
     assert resposta.status_code == 400
+
+
+def test_api_jogos_paginada_retorna_metadados(client_autenticado):
+    client_autenticado.post("/api/jogos", json={"titulo": "A", "favorito": True, "prioridade": "alta"})
+    client_autenticado.post("/api/jogos", json={"titulo": "B"})
+
+    resposta = client_autenticado.get("/api/jogos?paginado=1&favorito=true&page=1&per_page=1")
+
+    assert resposta.status_code == 200
+    dados = resposta.get_json()
+    assert dados["paginacao"]["total"] == 1
+    assert dados["paginacao"]["por_pagina"] == 1
+    assert dados["itens"][0]["titulo"] == "A"
+
+
+def test_api_atualiza_preferencias_sem_alterar_restante(client_autenticado):
+    criado = client_autenticado.post("/api/jogos", json={"titulo": "Hades"}).get_json()
+
+    resposta = client_autenticado.patch(
+        f"/api/jogos/{criado['id']}/preferencias",
+        json={"favorito": True, "prioridade": "alta"},
+    )
+
+    assert resposta.status_code == 200
+    jogo = resposta.get_json()
+    assert jogo["titulo"] == "Hades"
+    assert jogo["favorito"] is True
+    assert jogo["prioridade"] == "alta"
+
+
+def test_api_detalhe_de_jogo_de_outro_usuario_retorna_404(client_autenticado, app):
+    from app.extensions import db
+    from app.models import Jogo, Usuario
+
+    with app.app_context():
+        outro = Usuario(nome="Outro", username="outro2", email="outro2@savepoint.dev")
+        outro.set_senha("SenhaForte123")
+        db.session.add(outro)
+        db.session.commit()
+        jogo = Jogo(usuario_id=outro.id, titulo="Privado")
+        db.session.add(jogo)
+        db.session.commit()
+        jogo_id = jogo.id
+
+    resposta = client_autenticado.get(f"/api/jogos/{jogo_id}")
+    assert resposta.status_code == 404

@@ -10,15 +10,22 @@ class RunDiario(db.Model):
     __table_args__ = (
         db.CheckConstraint(f"resultado IN {RESULTADOS_VALIDOS}", name="ck_run_resultado_valido"),
         db.CheckConstraint("duracao_segundos > 0", name="ck_run_duracao_positiva"),
+        db.Index("ix_run_jogo_categoria", "jogo_id", "categoria"),
     )
 
     id = db.Column(db.Integer, primary_key=True)
     jogo_id = db.Column(db.Integer, db.ForeignKey("jogo.id", ondelete="CASCADE"), nullable=False, index=True)
+    build_id = db.Column(db.Integer, db.ForeignKey("build_anotacao.id", ondelete="SET NULL"), nullable=True, index=True)
 
     data = db.Column(db.Date, nullable=False, default=date_cls.today)
     duracao_segundos = db.Column(db.Integer, nullable=False, default=1)
     resultado = db.Column(db.String(10), nullable=False)
+    categoria = db.Column(db.String(80), nullable=False, default="Casual", server_default="Casual")
     causa_morte = db.Column(db.String(200), nullable=True)
+    observacao = db.Column(db.String(300), nullable=True)
+    eh_pb = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+
+    build = db.relationship("BuildAnotacao")
 
     @property
     def tempo_formatado(self):
@@ -54,8 +61,12 @@ class RunDiario(db.Model):
         return {
             "id": self.id,
             "jogo_id": self.jogo_id,
+            "build_id": self.build_id,
             "data": self.data.isoformat(),
             "tempo_duracao": self.tempo_formatado,
             "resultado": self.resultado,
+            "categoria": self.categoria,
             "causa_morte": self.causa_morte,
+            "observacao": self.observacao,
+            "eh_pb": self.eh_pb,
         }
