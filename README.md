@@ -6,35 +6,57 @@ Além da integração com a biblioteca Steam, o sistema permite acompanhar conqu
 
 ## Principais recursos
 
-* sincronização da biblioteca Steam;
-* importação de capas, tempo jogado e atividade recente;
-* sincronização de conquistas com ícones;
-* detalhamento das conquistas por jogo;
-* backlog com:
+- sincronização da biblioteca Steam;
+- importação de capas, tempo jogado e atividade recente;
+- sincronização de conquistas com ícones;
+- detalhamento das conquistas por jogo;
+- backlog com busca, filtros, ordenação, paginação, favoritos e prioridades;
+- página de detalhes do jogo com visão geral, conquistas, Jornada, desafios e histórico;
+- dashboard com informações sobre a saúde do backlog e jogos próximos da conclusão;
+- Jornada unificada para builds, runs, categorias e recordes pessoais;
+- builds com atributos flexíveis para diferentes gêneros de jogos;
+- desafios pessoais de backlog, conquistas e speedrun;
+- runs organizadas por categoria e associáveis a builds;
+- identificação automática de recordes pessoais (PB);
+- evolução do banco de dados utilizando Flask-Migrate e Alembic.
 
-  * busca;
-  * filtros;
-  * ordenação;
-  * paginação;
-  * favoritos;
-  * prioridades;
-* página de detalhes do jogo com abas para:
+## Tecnologias
 
-  * visão geral;
-  * conquistas;
-  * Jornada;
-  * desafios;
-  * histórico;
-* dashboard com informações sobre a saúde do backlog e jogos próximos da conclusão;
-* Jornada unificada para builds, runs, categorias e recordes pessoais;
-* builds com atributos flexíveis para diferentes gêneros de jogos;
-* desafios pessoais de backlog, conquistas e speedrun;
-* runs organizadas por categoria;
-* associação de runs com builds;
-* identificação automática de recordes pessoais (PB);
-* evolução do banco de dados utilizando Flask-Migrate e Alembic.
+### Backend
 
----
+- **Python 3**;
+- **Flask** — framework web;
+- **Flask-SQLAlchemy / SQLAlchemy** — ORM e acesso ao banco de dados;
+- **Flask-Migrate / Alembic** — versionamento e migração do schema;
+- **Flask-WTF** — proteção CSRF;
+- **Requests** — comunicação com a Steam Web API;
+- **python-dotenv** — carregamento das variáveis de ambiente.
+
+### Frontend
+
+- **HTML5** com templates **Jinja2**;
+- **CSS3** com CSS Grid, media queries e layout responsivo;
+- **JavaScript Vanilla**;
+- **Fetch API** para consumo dos endpoints JSON do backend;
+- práticas básicas de acessibilidade com HTML semântico e atributos ARIA.
+
+### Banco de dados
+
+- **SQLite** como opção padrão para desenvolvimento local;
+- **PostgreSQL** por meio da variável `DATABASE_URL`;
+- **psycopg2** como driver PostgreSQL.
+
+### Testes e infraestrutura
+
+- **Pytest** para testes automatizados;
+- **Docker** e **Docker Compose** para execução em containers;
+- **Git/GitHub** para versionamento e colaboração.
+
+## Arquitetura
+
+O SavePoint utiliza **Application Factory**, **Blueprints**, uma camada de serviços para as principais regras de negócio e persistência com SQLAlchemy.
+
+O diagrama e a descrição detalhada da arquitetura estão disponíveis em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 ## Execução local
 
@@ -78,15 +100,9 @@ Edite o arquivo `.env` conforme necessário.
 
 ### 4. Criar ou atualizar o banco de dados
 
-> **Importante:** o projeto utiliza Flask-Migrate/Alembic. Em uma instalação nova, executar apenas `python run.py` não cria automaticamente as tabelas do banco.
-
-Execute:
-
 ```bash
 python -m flask --app run.py db upgrade
 ```
-
-Esse comando aplica todas as migrações pendentes e prepara o schema necessário para a aplicação.
 
 Para verificar a migração atual:
 
@@ -106,27 +122,21 @@ A aplicação ficará disponível em:
 http://localhost:5000
 ```
 
----
-
 ## Banco de dados
 
 ### SQLite
 
-Caso `DATABASE_URL` não seja definida, o SavePoint utiliza SQLite automaticamente.
-
-O banco é armazenado em:
+Caso `DATABASE_URL` não seja definida, o SavePoint utiliza SQLite automaticamente em:
 
 ```text
 instance/savepoint.sqlite3
 ```
 
-Mesmo que o arquivo SQLite já exista, ainda é necessário executar as migrações em uma instalação nova:
+Mesmo que o arquivo SQLite já exista, ainda é necessário aplicar as migrações em uma instalação nova:
 
 ```bash
 python -m flask --app run.py db upgrade
 ```
-
----
 
 ## Dados de demonstração
 
@@ -143,11 +153,9 @@ usuário: demo
 senha: SavePoint123
 ```
 
----
-
 ## Integração com a Steam
 
-Para utilizar a integração com a Steam, defina `STEAM_API_KEY` no arquivo `.env`.
+Para utilizar a integração com a Steam, defina `STEAM_API_KEY` no arquivo `.env`:
 
 ```text
 STEAM_API_KEY=SUA_CHAVE
@@ -155,25 +163,18 @@ STEAM_API_KEY=SUA_CHAVE
 
 Para importar biblioteca e conquistas, o perfil Steam e os detalhes dos jogos da conta consultada precisam estar disponíveis para a API da Steam.
 
-A importação possui uma etapa de prévia. Antes da confirmação, o sistema analisa a biblioteca e informa quantos jogos serão:
-
-* adicionados;
-* associados;
-* atualizados;
-* preservados.
+A importação possui uma etapa de prévia. Antes da confirmação, o sistema analisa a biblioteca e informa quantos jogos serão adicionados, associados, atualizados ou preservados.
 
 A sincronização final atualiza jogos já vinculados sem duplicá-los e preserva dados válidos quando uma consulta externa falha.
 
 Durante a importação, o usuário pode manter novos jogos como `Quero jogar` ou permitir que o sistema os classifique automaticamente como:
 
-* `Quero jogar`;
-* `Jogando`;
-* `Jogado`;
-* `Platinado`.
+- `Quero jogar`;
+- `Jogando`;
+- `Jogado`;
+- `Platinado`.
 
 A classificação automática considera informações disponíveis na Steam, como atividade recente, tempo jogado e progresso de conquistas.
-
----
 
 ## Testes
 
@@ -189,25 +190,20 @@ Execute a suíte de testes:
 pytest -q
 ```
 
----
-
 ## Docker
-
-Para iniciar o projeto utilizando Docker:
 
 ```bash
 docker compose up --build
 ```
 
-O container da aplicação executa automaticamente:
+O container da aplicação executa `flask db upgrade` antes de iniciar o servidor web.
 
-```bash
-flask db upgrade
-```
+## Equipe e Contato
 
-antes de iniciar o servidor web.
+- **Adriano Silva** — GitHub: [@Tahuno](https://github.com/Tahuno)
+- **Victor Perim** — GitHub: [@VictorPerim123](https://github.com/VictorPerim123)
 
----
+**Repositório do projeto:** [github.com/VictorPerim123/BFD-Trabalho-Final](https://github.com/VictorPerim123/BFD-Trabalho-Final)
 
 ## Fluxo rápido para uma instalação nova
 
@@ -238,4 +234,3 @@ Depois, acesse:
 ```text
 http://localhost:5000
 ```
-
