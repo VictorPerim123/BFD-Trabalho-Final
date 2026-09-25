@@ -64,12 +64,18 @@
   }
 
   function closeOnBackdrop() {
-    formCard.addEventListener("click", (event) => {
+  formCard.addEventListener("click", (event) => {
+        if (event.target === formCard) {
       const rect = formCard.getBoundingClientRect();
-      const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
       if (!inside) closeForm();
-    });
-  }
+    }
+  });
+}
 
   function filteredChallenges() {
     return challenges.filter((challenge) => {

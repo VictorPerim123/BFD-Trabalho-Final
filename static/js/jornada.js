@@ -474,12 +474,18 @@
   }
 
   function closeOnBackdrop(dialog, closeFn) {
-    dialog.addEventListener("click", (event) => {
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) {
       const rect = dialog.getBoundingClientRect();
-      const inside = event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom;
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
       if (!inside) closeFn();
-    });
-  }
+    }
+  });
+}
 
   closeOnBackdrop(buildFormCard, closeBuildForm);
   closeOnBackdrop(runFormCard, closeRunForm);
